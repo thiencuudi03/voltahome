@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  /* Chuyển sang tông màu Đen - Vàng Gold Luxury */
+  --background: #050505;
+  --foreground: #ffffff;
+  --primary: #eab308; /* Màu Vàng Gold */
+  --primary-dark: #ca8a04;
+  --secondary: #27272a;
+  --muted: #18181b;
+  --border: rgba(255, 255, 255, 0.1);
+  --card: #0f0f0f;
+  --radius: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* XÓA scroll-behavior: smooth ở đây để Lenis hoạt động */
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  /* Đảm bảo chiều cao để có thể cuộn */
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* Giữ các class tiện ích của bạn nhưng cập nhật màu sắc */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.section-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--foreground); /* Đổi sang trắng */
+  margin-bottom: 1rem;
+}
+
+.gradient-text {
+  /* Gradient màu vàng đồng sang trọng */
+  background: linear-gradient(135deg, #fde047, #eab308);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.8rem;
+  border-radius: 9999px;
+  background: var(--primary); /* Vàng Gold */
+  color: black;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Các đoạn còn lại giữ nguyên... */
