@@ -1,14 +1,18 @@
+//Root layout
+
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import SmoothScroll from "@/lib/_smoothScroll"; // 1. Import cái này vào
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Volt Home",
-  description: "Website bán thiết bị điện tử",
+  title: "VoltHome | Thiết bị điện tử đỉnh cao",
+  description: "Trải nghiệm mua sắm thiết bị điện tử hiện đại",
 };
 
+// BẮT BUỘC phải có "export default" ở đây
 export default function RootLayout({
   children,
 }: {
@@ -16,14 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className="bg-black antialiased">
-        {" "}
-        {/* Thêm bg-black để đồng bộ phong cách tối */}
-        <SmoothScroll /> {/* 2. Gọi nó ở đây để kích hoạt cuộn mượt */}
+      <body className={`${inter.className} bg-black text-white antialiased`}>
+        {/* Header sẽ xuất hiện ở mọi trang */}
         <Header />
-        {/* 3. Thêm min-h-screen để main luôn chiếm hết màn hình, đẩy Footer xuống dưới */}
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+
+        {/* Children là nội dung của các trang như page.tsx */}
+        <main>{children}</main>
       </body>
     </html>
   );
