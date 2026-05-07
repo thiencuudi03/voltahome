@@ -1,5 +1,3 @@
-//Root layout
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -12,7 +10,6 @@ export const metadata: Metadata = {
   description: "Trải nghiệm mua sắm thiết bị điện tử hiện đại",
 };
 
-// BẮT BUỘC phải có "export default" ở đây
 export default function RootLayout({
   children,
 }: {
@@ -21,11 +18,13 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={`${inter.className} bg-black text-white antialiased`}>
-        {/* Header sẽ xuất hiện ở mọi trang */}
+        {/* Header xuất hiện cố định ở mọi trang */}
         <Header />
 
-        {/* Children là nội dung của các trang như page.tsx */}
-        <main>{children}</main>
+        {/* Thêm pt-20 để đẩy nội dung xuống dưới Header (cao 80px) */}
+        <main className="relative flex flex-col min-h-screen bg-[#050505]">
+          {children}
+        </main>
       </body>
     </html>
   );

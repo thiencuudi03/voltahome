@@ -1,12 +1,12 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useCartStore } from "@/store/cartStore";
 
 export const useCart = () => {
   const [isMounted, setIsMounted] = useState(false);
 
-  // Nếu vẫn bị đỏ ở 'state', bạn có thể viết (state: any) để chữa cháy nhanh,
-  // nhưng cách tốt nhất là đảm bảo Bước 1 đã chuẩn.
+  // Lấy các state và actions một cách tường minh từ Store
   const items = useCartStore((state) => state.items);
   const addItem = useCartStore((state) => state.addItem);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -19,19 +19,21 @@ export const useCart = () => {
     setIsMounted(true);
   }, []);
 
+  // Trình trạng Server Side Rendering (SSR)
   if (!isMounted) {
     return {
       items: [],
-      addItem,
-      removeItem,
-      updateQuantity,
-      clearCart,
+      addItem: () => {}, // Trả về hàm trống để khớp kiểu dữ liệu
+      removeItem: () => {},
+      updateQuantity: () => {},
+      clearCart: () => {},
       totalPrice: 0,
       totalItems: 0,
       isMounted: false,
     };
   }
 
+  // Trạng thái Client Side (Đã Mounted)
   return {
     items,
     addItem,

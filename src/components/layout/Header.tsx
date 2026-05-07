@@ -10,28 +10,19 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Sử dụng hook giỏ hàng đã xử lý chống lỗi Hydration
   const { totalItems } = useCart();
-
-  // Debounce giá trị tìm kiếm (ví dụ sau 500ms mới xử lý lọc)
   const debouncedSearch = useDebounce(searchQuery, 500);
 
   useEffect(() => {
+    setIsMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Giả sử sau này bạn sẽ điều hướng hoặc lọc sản phẩm dựa trên debouncedSearch
-  useEffect(() => {
-    if (debouncedSearch) {
-      console.log("Đang tìm kiếm:", debouncedSearch);
-      // Logic xử lý tìm kiếm ở đây
-    }
-  }, [debouncedSearch]);
 
   return (
     <header
@@ -50,7 +41,7 @@ export default function Header() {
           Volt<span className="text-yellow-500">Home</span>
         </Link>
 
-        {/* Menu - Ẩn khi đang mở search để dành không gian */}
+        {/* Menu - Hiện khi không tìm kiếm */}
         {!isSearchOpen && (
           <nav className="hidden md:flex gap-8 text-sm font-medium uppercase tracking-wider">
             <Link href="/" className="hover:text-yellow-400 transition-colors">
@@ -77,7 +68,7 @@ export default function Header() {
           </nav>
         )}
 
-        {/* Search Bar Input (Hiện ra khi bấm vào icon Search) */}
+        {/* Search Bar Input */}
         {isSearchOpen && (
           <div className="flex-1 max-w-md mx-8 animate-in fade-in slide-in-from-top-1">
             <div className="relative">
@@ -113,9 +104,12 @@ export default function Header() {
 
           <Link href="/cart" className="relative group">
             <ShoppingCart className="h-5 w-5 cursor-pointer group-hover:text-yellow-400 transition-colors" />
-            {/* Badge số lượng giỏ hàng */}
-            {totalItems > 0 && (
-              <span className="absolute -top-2 -right-2 bg-yellow-500 text-black text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border border-black group-hover:bg-white transition-colors">
+            {/* Badge chỉ render khi đã mounted */}
+            {isMounted && totalItems > 0 && (
+              <span
+                suppressHydrationWarning
+                className="absolute -top-2 -right-2 bg-yellow-500 text-black text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border border-black"
+              >
                 {totalItems}
               </span>
             )}
