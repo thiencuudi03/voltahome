@@ -28,7 +28,12 @@ export default function ProductCard({ product }: { product: Product }) {
               currency: "VND",
             }).format(product.price)}
           </span>
-          <button className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-[#C9A63F] hover:border-[#C9A63F] transition-all">
+
+          {/* SỬA Ở ĐÂY: Thêm suppressHydrationWarning để chặn lỗi từ các Extension */}
+          <button
+            suppressHydrationWarning
+            className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-[#C9A63F] hover:border-[#C9A63F] transition-all"
+          >
             +
           </button>
         </div>

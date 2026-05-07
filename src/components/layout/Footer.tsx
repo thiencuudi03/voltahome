@@ -1,78 +1,100 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 export default function Footer() {
   return (
-    // Sử dụng pt-48 để tách biệt hẳn với Section phía trên
-    <footer className="w-full bg-[#050505] pt-48 pb-20 px-6 md:px-20 border-t border-white/5 font-sans relative z-10">
-      <div className="max-w-[1700px] mx-auto">
-        {/* Nội dung chính của Footer */}
-        <div className="flex flex-col md:flex-row justify-between items-start gap-20 md:gap-32">
-          {/* Cột 1: Brand & Slogan */}
-          <div className="flex-[1.5] space-y-12">
-            <h3 className="text-white text-4xl font-black tracking-tighter uppercase">
-              Volt<span className="text-[#C9A63F]">Home</span>
-            </h3>
-            <p className="text-gray-500 text-xl leading-relaxed max-w-sm italic font-light opacity-70">
-              Kiến tạo không gian số đỉnh cao với thiết kế tối giản dành cho thế
-              hệ mới.
-            </p>
-          </div>
+    <footer className="relative bg-[#050505] pt-24 pb-12 px-6 md:px-20 border-t border-white/5 overflow-hidden">
+      {/* Hiệu ứng ánh sáng mờ góc footer */}
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#C9A63F]/5 blur-[120px] rounded-full -mr-64 -mb-64 pointer-events-none" />
 
-          {/* Cột 2: Khám phá */}
-          <div className="flex-1 space-y-12">
-            <h4 className="text-white font-bold text-[10px] uppercase tracking-[0.6em] opacity-40">
-              Khám phá
-            </h4>
-            <div className="flex flex-col gap-8">
-              {["Sản phẩm", "Bộ sưu tập", "Liên hệ"].map((item) => (
+      <div className="max-w-[1700px] mx-auto relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 mb-20">
+          {/* Cột 1: Thương hiệu & Slogan (Chiếm 6 cột để không gian rộng rãi) */}
+          <div className="lg:col-span-6 space-y-8">
+            <Link href="/" className="inline-block">
+              <h2 className="text-white text-3xl font-black tracking-tighter">
+                VOLT<span className="text-[#C9A63F]">HOME</span>.
+              </h2>
+            </Link>
+            <p className="text-gray-500 text-lg font-light leading-relaxed max-w-md italic">
+              "Nơi công nghệ không chỉ là thiết bị, mà là một tác phẩm nghệ
+              thuật trong không gian sống của bạn."
+            </p>
+            <div className="flex gap-6 items-center">
+              {["FB", "IG", "TW", "BE"].map((social) => (
                 <a
-                  key={item}
+                  key={social}
                   href="#"
-                  className="text-gray-400 text-xl hover:text-[#C9A63F] transition-colors italic w-fit tracking-widest"
+                  className="text-gray-600 hover:text-[#C9A63F] text-[10px] font-bold tracking-widest transition-colors duration-300"
                 >
-                  {item}
+                  {social}
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Cột 3: Newsletter */}
-          <div className="flex-1 w-full max-w-md space-y-12">
-            <h4 className="text-white font-bold text-[10px] uppercase tracking-[0.6em] opacity-40">
-              Bản tin
+          {/* Cột 2: Link điều hướng (Chiếm 3 cột) */}
+          <div className="lg:col-span-3">
+            <div className="space-y-6">
+              <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold">
+                Khám phá
+              </h4>
+              <ul className="space-y-4">
+                {["Sản phẩm", "Bộ sưu tập", "Công nghệ", "Ưu đãi"].map(
+                  (item) => (
+                    <li key={item}>
+                      <Link
+                        href="#"
+                        className="text-gray-500 hover:text-white text-sm transition-colors font-light"
+                      >
+                        {item}
+                      </Link>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          </div>
+
+          {/* Cột 3: Đăng ký nhận tin - Newsletter (Chiếm 3 cột) */}
+          <div className="lg:col-span-3 space-y-8">
+            <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold">
+              Newsletter
             </h4>
-            <div className="relative w-full pt-4 group">
+            <div className="relative group">
               <input
-                suppressHydrationWarning={true} // SỬA LỖI HYDRATION TẠI ĐÂY
+                suppressHydrationWarning
                 type="email"
-                placeholder="Email của bạn..."
-                className="w-full bg-transparent border-b border-white/10 py-5 text-xl text-white outline-none focus:border-[#C9A63F] transition-all placeholder:text-gray-800 font-light"
+                placeholder="Email của bạn"
+                className="w-full bg-transparent border-b border-white/10 py-3 text-sm text-white focus:outline-none focus:border-[#C9A63F] transition-colors placeholder:text-gray-700"
               />
               <button
-                suppressHydrationWarning={true} // SỬA LỖI HYDRATION TẠI ĐÂY
-                className="absolute right-0 top-6 text-[#C9A63F] text-3xl hover:text-white transition-all"
+                suppressHydrationWarning
+                className="absolute right-0 bottom-3 text-[#C9A63F] text-xs font-bold tracking-widest hover:translate-x-1 transition-transform"
               >
-                →
+                GỬI →
               </button>
             </div>
+            <p className="text-[10px] text-gray-600 leading-relaxed uppercase tracking-wider">
+              Nhận thông tin về các sản phẩm giới hạn sớm nhất.
+            </p>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-64 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] text-gray-700 uppercase tracking-[0.5em]">
-          <p className="text-center md:text-left">
-            © 2026 <span className="font-bold text-gray-500">VOLTHOME</span>.
-            ALL RIGHTS RESERVED.
+        {/* Phần Bottom Footer */}
+        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-gray-700 text-[10px] uppercase tracking-[0.2em] font-medium">
+            © Đỗ Thị Cúc Huệ - 2026
           </p>
-          <div className="flex gap-16">
-            <span className="hover:text-white cursor-pointer transition-colors">
-              Privacy
-            </span>
-            <span className="hover:text-white cursor-pointer transition-colors">
-              Terms
-            </span>
+          <div className="flex gap-8 items-center text-[10px] uppercase tracking-[0.2em] font-medium text-gray-700">
+            <Link href="#" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="#" className="hover:text-white transition-colors">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,15 +17,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
-      <body className={`${inter.className} bg-black text-white antialiased`}>
-        {/* Header xuất hiện cố định ở mọi trang */}
+    <html lang="vi" className="dark" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
+        // SỬA: Đã xóa overflow-x-hidden ở đây để Lenis Scroll hoạt động mượt
+        className={`${inter.className} bg-[#050505] text-white min-h-screen flex flex-col w-full`}
+      >
         <Header />
 
-        {/* Thêm pt-20 để đẩy nội dung xuống dưới Header (cao 80px) */}
-        <main className="relative flex flex-col min-h-screen bg-[#050505]">
+        {/* SỬA: Chuyển overflow-x-hidden xuống main. Đổi mt-20 thành pt-20 */}
+        <main className="flex-1 pt-20 flex flex-col w-full relative overflow-x-hidden">
           {children}
         </main>
+
+        <Footer />
       </body>
     </html>
   );
