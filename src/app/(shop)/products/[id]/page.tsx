@@ -47,7 +47,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         </Link>
         <span className="mx-2">/</span>
         <Link href="/products" className="hover:text-black transition-colors">
-          Sản phẩm
+          Danh mục sản phẩm
         </Link>
         <span className="mx-2">/</span>
         <span className="text-black font-medium">{product.name}</span>
