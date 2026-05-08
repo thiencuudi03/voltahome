@@ -1,4 +1,3 @@
-// src/data/mockProducts.ts
 import { Product } from "../types/product";
 
 export const mockProducts: Product[] = [
@@ -9,7 +8,7 @@ export const mockProducts: Product[] = [
       "Chip M3 Max cực khủng với 14-core CPU và 30-core GPU, bộ nhớ thống nhất 36GB.",
     price: 79990000,
     image: "/images/products/macbook-m3.png",
-    category: "Laptop",
+    category: "Laptop Premium",
     stock: 5,
     rating: 5,
   },
@@ -31,7 +30,7 @@ export const mockProducts: Product[] = [
       "Chống ồn đỉnh cao, chất âm trung thực, thời lượng pin lên đến 30 giờ.",
     price: 8450000,
     image: "/images/products/sony-wh1000xm5.png",
-    category: "Tai nghe",
+    category: "Thiết bị SmartHome",
     stock: 20,
     rating: 4.9,
   },
@@ -42,7 +41,7 @@ export const mockProducts: Product[] = [
       "Thiết kế tối giản, switch cơ học cao cấp, hỗ trợ thay thế nóng (hot-swap).",
     price: 2500000,
     image: "/images/products/keyboard-volt.png",
-    category: "Phụ kiện",
+    category: "Phụ kiện cao cấp",
     stock: 15,
     rating: 4.7,
   },
@@ -52,7 +51,7 @@ export const mockProducts: Product[] = [
     description:
       "Màn hình hiển thị xuất sắc nhất thế giới, hỗ trợ Apple Pencil 2.",
     price: 28990000,
-    category: "Máy tính bảng",
+    category: "Laptop Premium",
     image: "/images/products/ipad-pro.png",
     stock: 8,
     rating: 4.9,

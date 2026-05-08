@@ -1,151 +1,161 @@
+// Danh mục sản phẩm
+
+"use client";
+
+import React, { useState } from "react";
 import { mockProducts } from "@/data/mockProducts";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { formatCurrency } from "@/utils/formatters";
-import AddToCartButton from "@/components/product/AddToCartButton";
+import ProductCard from "@/components/product/ProductCard";
 
-interface ProductPageProps {
-  params: Promise<{ id: string }>;
-}
+// Danh mục và mức giá mẫu (Sẽ đồng bộ với DB sau)
+const CATEGORIES = [
+  "Tất cả",
+  "Laptop Premium",
+  "Điện thoại",
+  "Phụ kiện cao cấp",
+  "Thiết bị SmartHome",
+];
+const PRICE_RANGES = [
+  "Tất cả mức giá",
+  "Dưới 20 triệu",
+  "20 - 40 triệu",
+  "40 - 60 triệu",
+  "Trên 60 triệu",
+];
 
-// 1. Cấu hình SEO động
-export async function generateMetadata({ params }: ProductPageProps) {
-  const { id } = await params;
-  // Ép kiểu String để so sánh chính xác tuyệt đối
-  const product = mockProducts.find((p) => String(p.id) === String(id));
+export default function ModernProductsPage() {
+  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
-  return {
-    title: product ? `${product.name} | VoltHome` : "Sản phẩm không tồn tại",
-  };
-}
-
-export default async function ProductDetailPage({ params }: ProductPageProps) {
-  // 2. Giải nén ID từ params (Bắt buộc cho Next.js 15)
-  const { id } = await params;
-
-  // 3. Logic tìm kiếm an toàn: chuyển cả hai về String để so sánh
-  const product = mockProducts.find((p) => String(p.id) === String(id));
-
-  // 4. Nếu không tìm thấy sản phẩm trong mockProducts, trả về 404
-  if (!product) {
-    notFound();
-  }
+  const filteredProducts =
+    selectedCategory === "Tất cả"
+      ? mockProducts
+      : mockProducts.filter((product) => product.category === selectedCategory);
 
   return (
-    <main className="min-h-screen bg-[#050505] py-24 px-6 md:px-20 relative overflow-hidden">
-      {/* Hiệu ứng ánh sáng nền Luxury */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#C9A63F]/5 blur-[150px] rounded-full pointer-events-none" />
+    <main className="min-h-screen bg-[#050505] py-20 px-6 md:px-20 relative z-10 overflow-hidden">
+      {/* Hiệu ứng ánh sáng nền mờ */}
+      <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-[#C9A63F]/5 blur-[200px] rounded-full -ml-96 -mt-96 pointer-events-none" />
 
       <div className="max-w-[1700px] mx-auto relative z-10">
-        {/* Breadcrumb bám sát báo cáo đồ án [cite: 89] */}
-        <nav className="flex items-center space-x-4 mb-16 text-[10px] uppercase tracking-[0.4em] text-gray-500 font-bold">
-          <Link href="/" className="hover:text-[#C9A63F] transition-colors">
-            Trang chủ
-          </Link>
-          <span className="opacity-20">/</span>
-          <Link
-            href="/products"
-            className="hover:text-[#C9A63F] transition-colors"
-          >
-            Bộ sưu tập
-          </Link>
-          <span className="opacity-20">/</span>
-          <span className="text-white opacity-40">{product.name}</span>
-        </nav>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
-          {/* CỘT TRÁI: Hình ảnh sản phẩm (7/12 cột) */}
-          <div className="lg:col-span-7">
-            <div className="sticky top-32 group relative aspect-[4/5] bg-white/[0.02] border border-white/5 rounded-[4rem] overflow-hidden flex items-center justify-center p-10">
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
-                className="object-contain p-12 transition-transform duration-1000 group-hover:scale-105"
-              />
-              <div className="absolute bottom-10 left-10 text-[8px] uppercase tracking-[1em] text-white/10 vertical-text hidden md:block">
-                VOLTHOME PREMIUM SELECTION
-              </div>
-            </div>
+        {/* Header Trang: Thiết kế Typo đậm, mạnh mẽ, hiện đại */}
+        <div className="mb-20 pb-10 border-b border-white/5 flex flex-col md:flex-row justify-between items-end gap-6">
+          <div className="space-y-3">
+            <p className="text-[#C9A63F] text-xs uppercase tracking-[0.6em] font-bold opacity-60">
+              Bộ sưu tập thiết bị
+            </p>
+            <h1 className="text-white text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.85]">
+              CÔNG NGHỆ <br />
+              <span className="text-[#C9A63F]">TỐI GIẢN</span>
+            </h1>
           </div>
+          <p className="text-gray-500 italic max-w-sm text-sm font-light leading-relaxed">
+            Nơi hội tụ những kiệt tác công nghệ, được chọn lọc khắt khe, mang
+            lại trải nghiệm sống thượng lưu cho không gian của bạn.
+          </p>
+        </div>
 
-          {/* CỘT PHẢI: Thông tin chi tiết (5/12 cột) */}
-          <div className="lg:col-span-5 flex flex-col justify-center">
-            <div className="space-y-12">
-              <div className="space-y-6">
-                <p className="text-[#C9A63F] text-xs uppercase tracking-[0.6em] font-bold">
-                  {product.category}
-                </p>
-                <h1 className="text-white text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9]">
-                  {product.name}
-                </h1>
-                <div className="flex items-center gap-6 pt-4">
-                  <span className="text-[#C9A63F] text-4xl font-serif italic">
-                    {formatCurrency(product.price)}
-                  </span>
-                  <span className="px-3 py-1 border border-white/10 rounded-full text-[9px] text-green-500 uppercase tracking-widest font-bold">
-                    Còn hàng
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-6 border-t border-white/5 pt-10">
-                <h3 className="text-white text-[10px] uppercase tracking-[0.4em] font-bold opacity-60">
-                  Đặc điểm nổi bật
-                </h3>
-                <p className="text-gray-400 font-light leading-relaxed text-lg italic">
-                  {product.description ||
-                    "Tuyệt tác công nghệ hội tụ sự tinh giản và sức mạnh vượt trội."}
-                </p>
-              </div>
-
-              {/* Grid thông số [cite: 19] */}
-              <div className="grid grid-cols-2 gap-8 py-10 border-t border-white/5">
-                <div className="space-y-1">
-                  <span className="block text-gray-600 text-[9px] uppercase tracking-widest font-bold">
-                    Vật liệu
-                  </span>
-                  <span className="text-white text-sm font-light uppercase tracking-wider">
-                    Titanium / Glass
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <span className="block text-gray-600 text-[9px] uppercase tracking-widest font-bold">
-                    Bảo hành
-                  </span>
-                  <span className="text-white text-sm font-light uppercase tracking-wider">
-                    24 tháng chính hãng
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-6 items-center">
-                <AddToCartButton
-                  product={product}
-                  className="w-full sm:flex-1 py-6 bg-[#C9A63F] text-black font-black uppercase tracking-[0.3em] text-[10px] rounded-full hover:bg-white transition-all duration-500"
+        <div className="flex flex-col lg:flex-row gap-20">
+          {/* Cột trái: Bộ lọc (Sticky Sidebar) */}
+          <aside className="w-full lg:w-1/4 space-y-16 lg:sticky lg:top-32 self-start">
+            {/* 1. Tìm kiếm - Hiện đại hơn với Border bo tròn nhẹ */}
+            <div className="space-y-6">
+              <h3 className="text-white text-[11px] uppercase tracking-[0.4em] font-bold">
+                Tìm kiếm sản phẩm
+              </h3>
+              <div className="relative">
+                <input
+                  suppressHydrationWarning
+                  type="text"
+                  placeholder="MacBook Pro, iPhone 16..."
+                  className="w-full bg-[#080808] border border-white/5 rounded-full py-4 pl-12 pr-6 text-sm text-white focus:outline-none focus:border-[#C9A63F]/50 transition-colors placeholder:text-gray-700"
                 />
-                <button className="w-full sm:w-20 h-20 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/5 transition-colors group">
-                  <span className="group-hover:scale-125 transition-transform">
-                    ♥
-                  </span>
-                </button>
-              </div>
-
-              <div className="pt-10 flex justify-between items-center opacity-20 border-t border-white/5">
-                <div className="text-[8px] text-white uppercase tracking-widest">
-                  Free Shipping Worldwide
-                </div>
-                <div className="text-[8px] text-white uppercase tracking-widest">
-                  Secure Global Payment
-                </div>
-                <div className="text-[8px] text-white uppercase tracking-widest">
-                  Official VoltHome Warranty
-                </div>
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700">
+                  🔍
+                </span>
               </div>
             </div>
+
+            {/* 2. Danh mục - Thiết kế nút bấm tinh tế */}
+            <div className="space-y-6">
+              <h3 className="text-white text-[11px] uppercase tracking-[0.4em] font-bold">
+                Danh mục
+              </h3>
+              <ul className="space-y-3">
+                {CATEGORIES.map((item) => (
+                  <li key={item}>
+                    <button
+                      suppressHydrationWarning
+                      onClick={() => setSelectedCategory(item)}
+                      className={`text-sm py-2 px-4 rounded-full transition-all duration-300 w-full text-left flex justify-between items-center ${
+                        selectedCategory === item
+                          ? "bg-[#C9A63F] text-black font-bold"
+                          : "text-gray-500 font-light hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      {item}
+                      {selectedCategory === item && (
+                        <span className="text-xs">→</span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 3. Lọc theo giá - Thiết kế tối giản */}
+            <div className="space-y-6">
+              <h3 className="text-white text-[11px] uppercase tracking-[0.4em] font-bold">
+                Mức giá (VND)
+              </h3>
+              <ul className="space-y-3 pl-2 border-l border-white/5">
+                {PRICE_RANGES.map((item, idx) => (
+                  <li key={item}>
+                    <button
+                      suppressHydrationWarning
+                      className={`text-sm py-1.5 transition-colors w-full text-left ${
+                        idx === 0
+                          ? "text-white font-medium relative before:absolute before:left-[-11px] before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:bg-[#C9A63F] before:rounded-full"
+                          : "text-gray-500 font-light hover:text-white"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
+
+          {/* Cột phải: Lưới sản phẩm - Tăng độ rộng và khoảng cách */}
+          <div className="w-full lg:w-3/4 space-y-10">
+            <div className="flex justify-between items-center text-sm border-b border-white/5 pb-6">
+              <p className="text-gray-500 font-light italic">
+                Hiển thị {filteredProducts.length} kết quả cho "
+                {selectedCategory}"
+              </p>
+              <select className="bg-transparent text-white text-xs uppercase tracking-widest font-bold focus:outline-none cursor-pointer">
+                {/* Đổi bg-black thành className="bg-black" */}
+                <option className="bg-black">Mặc định</option>
+                <option className="bg-black">Giá thấp - cao</option>
+                <option className="bg-black">Giá cao - thấp</option>
+              </select>
+            </div>
+
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-16">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-24 text-center border border-white/5 rounded-[3rem] bg-[#080808] flex flex-col items-center gap-6">
+                <span className="text-6xl">📦</span>
+                <p className="text-gray-500 italic max-w-sm leading-relaxed">
+                  Rất tiếc, bộ sưu tập của chúng tôi hiện chưa có sản phẩm nào
+                  thuộc danh mục "{selectedCategory}" phù hợp với yêu cầu của
+                  bạn.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
