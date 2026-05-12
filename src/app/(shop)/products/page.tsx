@@ -1,19 +1,21 @@
-// Danh mục sản phẩm
-
+// trang Danh mục sản phẩm
 "use client";
 
+import SortDropdown from "@/components/product/SortDropdown";
 import React, { useState } from "react";
 import { mockProducts } from "@/data/mockProducts";
 import ProductCard from "@/components/product/ProductCard";
+import { useSearchParams } from "next/navigation";
 
-// Danh mục và mức giá mẫu (Sẽ đồng bộ với DB sau)
+// Đã đồng bộ tên danh mục với mockProducts.ts
 const CATEGORIES = [
   "Tất cả",
-  "Laptop Premium",
+  "Laptop",
   "Điện thoại",
-  "Phụ kiện cao cấp",
+  "Phụ kiện",
   "Thiết bị SmartHome",
 ];
+
 const PRICE_RANGES = [
   "Tất cả mức giá",
   "Dưới 20 triệu",
@@ -25,10 +27,19 @@ const PRICE_RANGES = [
 export default function ModernProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
-  const filteredProducts =
-    selectedCategory === "Tất cả"
-      ? mockProducts
-      : mockProducts.filter((product) => product.category === selectedCategory);
+  // Đọc từ khóa tìm kiếm (q) từ URL do Header truyền tới
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q")?.toLowerCase() || "";
+
+  // Lọc sản phẩm theo danh mục VÀ theo từ khóa tìm kiếm
+  const filteredProducts = mockProducts.filter((product) => {
+    const matchCategory =
+      selectedCategory === "Tất cả" || product.category === selectedCategory;
+    const matchSearch =
+      product.name.toLowerCase().includes(searchQuery) ||
+      product.category.toLowerCase().includes(searchQuery);
+    return matchCategory && matchSearch;
+  });
 
   return (
     <main className="min-h-screen bg-[#050505] py-20 px-6 md:px-20 relative z-10 overflow-hidden">
@@ -56,7 +67,7 @@ export default function ModernProductsPage() {
         <div className="flex flex-col lg:flex-row gap-20">
           {/* Cột trái: Bộ lọc (Sticky Sidebar) */}
           <aside className="w-full lg:w-1/4 space-y-16 lg:sticky lg:top-32 self-start">
-            {/* 1. Tìm kiếm - Hiện đại hơn với Border bo tròn nhẹ */}
+            {/* 1. Tìm kiếm */}
             <div className="space-y-6">
               <h3 className="text-white text-[11px] uppercase tracking-[0.4em] font-bold">
                 Tìm kiếm sản phẩm
@@ -65,8 +76,9 @@ export default function ModernProductsPage() {
                 <input
                   suppressHydrationWarning
                   type="text"
-                  placeholder="MacBook Pro, iPhone 16..."
-                  className="w-full bg-[#080808] border border-white/5 rounded-full py-4 pl-12 pr-6 text-sm text-white focus:outline-none focus:border-[#C9A63F]/50 transition-colors placeholder:text-gray-700"
+                  placeholder="Dùng biểu tượng 🔍 ở trên..."
+                  disabled
+                  className="w-full bg-[#080808] border border-white/5 rounded-full py-4 pl-12 pr-6 text-sm text-gray-500 focus:outline-none cursor-not-allowed"
                 />
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700">
                   🔍
@@ -131,13 +143,16 @@ export default function ModernProductsPage() {
               <p className="text-gray-500 font-light italic">
                 Hiển thị {filteredProducts.length} kết quả cho "
                 {selectedCategory}"
+                {searchQuery && (
+                  <span className="text-[#C9A63F]">
+                    {" "}
+                    {` (Từ khóa: ${searchQuery})`}
+                  </span>
+                )}
               </p>
-              <select className="bg-transparent text-white text-xs uppercase tracking-widest font-bold focus:outline-none cursor-pointer">
-                {/* Đổi bg-black thành className="bg-black" */}
-                <option className="bg-black">Mặc định</option>
-                <option className="bg-black">Giá thấp - cao</option>
-                <option className="bg-black">Giá cao - thấp</option>
-              </select>
+
+              {/* Đã thay thế thẻ select bằng SortDropdown */}
+              <SortDropdown />
             </div>
 
             {filteredProducts.length > 0 ? (

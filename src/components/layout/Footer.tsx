@@ -2,98 +2,113 @@
 
 import React from "react";
 import Link from "next/link";
+// Đảm bảo các icon này tồn tại trong lucide-react của bạn
+import { Globe, Layers, Send, Mail, Phone, ArrowUpRight } from "lucide-react";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="relative bg-[#050505] pt-24 pb-12 px-6 md:px-20 border-t border-white/5 overflow-hidden">
-      {/* Hiệu ứng ánh sáng mờ góc footer */}
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#C9A63F]/5 blur-[120px] rounded-full -mr-64 -mb-64 pointer-events-none" />
+    <footer className="bg-[#050505] border-t border-white/5 pt-24 pb-12 px-6 md:px-20 relative overflow-hidden">
+      {/* Glow Effect - Tạo chiều sâu cho chân trang */}
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#C9A63F]/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="max-w-[1700px] mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 mb-20">
-          {/* Cột 1: Thương hiệu & Slogan (Chiếm 6 cột để không gian rộng rãi) */}
-          <div className="lg:col-span-6 space-y-8">
-            <Link href="/" className="inline-block">
-              <h2 className="text-white text-3xl font-black tracking-tighter">
-                VOLT<span className="text-[#C9A63F]">HOME</span>.
-              </h2>
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
+          {/* CỘT 1: THƯƠNG HIỆU & SOCIAL */}
+          <div className="lg:col-span-5 space-y-8">
+            <Link
+              href="/"
+              className="text-3xl font-black tracking-tighter text-white inline-block"
+            >
+              VOLT<span className="text-[#C9A63F]">HOME</span>.
             </Link>
-            <p className="text-gray-500 text-lg font-light leading-relaxed max-w-md italic">
+            <p className="text-gray-500 text-lg font-light leading-relaxed max-w-sm italic">
               "Nơi công nghệ không chỉ là thiết bị, mà là một tác phẩm nghệ
-              thuật trong không gian sống của bạn."
+              thuật."
             </p>
-            <div className="flex gap-6 items-center">
-              {["FB", "IG", "TW", "BE"].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  className="text-gray-600 hover:text-[#C9A63F] text-[10px] font-bold tracking-widest transition-colors duration-300"
-                >
-                  {social}
-                </a>
-              ))}
+            <div className="flex gap-6">
+              <Link
+                href="#"
+                className="text-gray-600 hover:text-[#C9A63F] transition-all duration-300 hover:-translate-y-1"
+              >
+                <Globe size={18} />
+              </Link>
+              <Link
+                href="#"
+                className="text-gray-600 hover:text-[#C9A63F] transition-all duration-300 hover:-translate-y-1"
+              >
+                <Layers size={18} />
+              </Link>
             </div>
           </div>
 
-          {/* Cột 2: Link điều hướng (Chiếm 3 cột) */}
-          <div className="lg:col-span-3">
-            <div className="space-y-6">
-              <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold">
-                Khám phá
-              </h4>
-              <ul className="space-y-4">
-                {["Sản phẩm", "Bộ sưu tập", "Công nghệ", "Ưu đãi"].map(
-                  (item) => (
-                    <li key={item}>
-                      <Link
-                        href="#"
-                        className="text-gray-500 hover:text-white text-sm transition-colors font-light"
-                      >
-                        {item}
-                      </Link>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </div>
-          </div>
-
-          {/* Cột 3: Đăng ký nhận tin - Newsletter (Chiếm 3 cột) */}
+          {/* CỘT 2: KHÁM PHÁ (Liên kết với Header) */}
           <div className="lg:col-span-3 space-y-8">
-            <h4 className="text-white text-[11px] uppercase tracking-[0.3em] font-bold">
+            <h4 className="text-[11px] uppercase tracking-[0.4em] font-black text-[#C9A63F]">
+              Khám phá
+            </h4>
+            <ul className="space-y-4">
+              {[
+                { name: "Sản phẩm", href: "/products" },
+                { name: "Ưu đãi", href: "/offers", special: true }, // Khớp với link trên Header
+                { name: "Giới thiệu", href: "/about" },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link
+                    href={item.href}
+                    className={`text-sm transition-colors duration-300 font-light flex items-center gap-2 group ${
+                      item.special
+                        ? "text-[#C9A63F] font-medium"
+                        : "text-gray-500 hover:text-white"
+                    }`}
+                  >
+                    {item.name}
+                    <ArrowUpRight
+                      size={10}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* CỘT 3: NEWSLETTER & CONTACT */}
+          <div className="lg:col-span-4 space-y-8">
+            <h4 className="text-[11px] uppercase tracking-[0.4em] font-black text-[#C9A63F]">
               Newsletter
             </h4>
             <div className="relative group">
               <input
-                suppressHydrationWarning
                 type="email"
                 placeholder="Email của bạn"
-                className="w-full bg-transparent border-b border-white/10 py-3 text-sm text-white focus:outline-none focus:border-[#C9A63F] transition-colors placeholder:text-gray-700"
+                className="w-full bg-transparent border-b border-white/10 py-4 text-sm font-light focus:outline-none focus:border-[#C9A63F] transition-colors placeholder:text-gray-700"
               />
-              <button
-                suppressHydrationWarning
-                className="absolute right-0 bottom-3 text-[#C9A63F] text-xs font-bold tracking-widest hover:translate-x-1 transition-transform"
-              >
-                GỬI →
+              <button className="absolute right-0 top-1/2 -translate-y-1/2 text-[#C9A63F] hover:text-white transition-colors">
+                <Send size={16} />
               </button>
             </div>
-            <p className="text-[10px] text-gray-600 leading-relaxed uppercase tracking-wider">
-              Nhận thông tin về các sản phẩm giới hạn sớm nhất.
-            </p>
+            <div className="pt-4 space-y-2 text-[10px] text-gray-600 uppercase tracking-widest">
+              <div className="flex items-center gap-2">
+                <Mail size={12} /> contact@volthome.com
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone size={12} /> +84 123 456 789
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Phần Bottom Footer */}
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-gray-700 text-[10px] uppercase tracking-[0.2em] font-medium">
-            © Đỗ Thị Cúc Huệ - 2026
-          </p>
-          <div className="flex gap-8 items-center text-[10px] uppercase tracking-[0.2em] font-medium text-gray-700">
+        {/* PHẦN CUỐI: BẢN QUYỀN */}
+        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-gray-700 uppercase tracking-[0.2em]">
+          <p>© {currentYear} VOLTHOME. ALL RIGHTS RESERVED.</p>
+          <div className="flex gap-8">
             <Link href="#" className="hover:text-white transition-colors">
-              Privacy Policy
+              Privacy
             </Link>
             <Link href="#" className="hover:text-white transition-colors">
-              Terms of Service
+              Terms
             </Link>
           </div>
         </div>

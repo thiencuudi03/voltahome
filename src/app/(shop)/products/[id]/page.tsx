@@ -1,165 +1,194 @@
-// Trang chi tiết sản phẩm
+"use client";
 
-import { mockProducts } from "@/data/mockProducts";
-import { notFound } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { formatCurrency } from "@/utils/formatters";
-import AddToCartButton from "@/components/product/AddToCartButton";
-import { ArrowLeft, ShieldCheck, Truck, Globe } from "lucide-react";
+import { useParams } from "next/navigation";
+import {
+  ChevronRight,
+  ShoppingCart,
+  CreditCard,
+  ShieldCheck,
+  Star,
+  Truck,
+  RotateCcw,
+  Plus,
+  Minus,
+} from "lucide-react";
+import { mockProducts } from "@/data/mockProducts"; // Đảm bảo đường dẫn này khớp với file data của bạn
+import { useCartStore } from "@/store/cartStore";
 
-interface ProductPageProps {
-  params: Promise<{ id: string }>;
-}
+export default function ProductDetailPage() {
+  const params = useParams();
+  const [quantity, setQuantity] = useState(1);
+  const addItem = useCartStore((state) => state.addItem);
 
-export async function generateMetadata({ params }: ProductPageProps) {
-  const { id } = await params;
-  const product = mockProducts.find((p) => String(p.id) === String(id));
-  return {
-    title: product ? `${product.name} | VoltHome` : "Sản phẩm không tồn tại",
-  };
-}
+  // Tìm sản phẩm dựa trên ID từ URL
+  const product = mockProducts.find((p) => p.id === params.id);
 
-export default async function ProductDetailPage({ params }: ProductPageProps) {
-  const { id } = await params;
-  const product = mockProducts.find((p) => String(p.id) === String(id));
+  // Cuộn lên đầu trang khi vào chi tiết
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  if (!product) notFound();
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white space-y-6">
+        <h1 className="text-4xl font-black uppercase tracking-widest text-gray-700">
+          Không tìm thấy sản phẩm
+        </h1>
+        <Link
+          href="/products"
+          className="text-[#C9A63F] border-b border-[#C9A63F] pb-1 uppercase text-sm font-bold"
+        >
+          Quay lại cửa hàng
+        </Link>
+      </div>
+    );
+  }
+
+  const formattedPrice = new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(product.price);
+  const oldPrice = new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(product.price * 1.15);
 
   return (
-    <main className="min-h-screen bg-[#050505] py-24 px-6 md:px-20 relative overflow-hidden">
-      {/* Aura illumination tạo chiều sâu cao cấp */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#C9A63F]/10 blur-[180px] rounded-full -mr-96 -mt-96 pointer-events-none" />
-
-      <div className="max-w-[1700px] mx-auto relative z-10">
-        {/* Navigation tinh tế */}
-        <div className="flex justify-between items-center mb-20">
-          <Link
-            href="/products"
-            className="group flex items-center text-gray-500 text-[10px] font-black uppercase tracking-[0.4em] hover:text-[#C9A63F] transition-all"
-          >
-            <ArrowLeft
-              size={14}
-              className="mr-3 group-hover:-translate-x-2 transition-transform"
-            />
-            Quay lại bộ sưu tập
+    <main className="min-h-screen bg-[#050505] text-white pt-32 pb-24 px-6 md:px-20">
+      <div className="max-w-7xl mx-auto">
+        {/* ĐIỀU HƯỚNG (BREADCRUMB) */}
+        <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-10">
+          <Link href="/" className="hover:text-[#C9A63F]">
+            Trang chủ
           </Link>
-          <div className="text-[9px] text-white/20 uppercase tracking-[0.6em] font-bold hidden md:block">
-            VoltHome / Product / {product.id}
-          </div>
-        </div>
+          <ChevronRight size={12} />
+          <Link href="/products" className="hover:text-[#C9A63F]">
+            {product.category}
+          </Link>
+          <ChevronRight size={12} />
+          <span className="text-[#C9A63F] truncate">{product.name}</span>
+        </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-32">
-          {/* CỘT TRÁI: Showcase hình ảnh (7/12 cột) */}
-          <div className="lg:col-span-7">
-            <div className="sticky top-32 group relative aspect-[4/5] bg-gradient-to-br from-white/[0.04] to-transparent border border-white/5 rounded-[5rem] overflow-hidden flex items-center justify-center p-12">
-              <Image
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          {/* TRÁI: HÌNH ẢNH */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="aspect-square w-full rounded-[2.5rem] overflow-hidden bg-[#0A0A0A] border border-white/5 p-12 flex items-center justify-center relative group">
+              <div className="absolute inset-0 bg-[#C9A63F]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <img
                 src={product.image}
                 alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
-                className="object-contain p-16 transition-transform duration-1000 group-hover:scale-105"
+                className="w-full h-full object-contain drop-shadow-[0_0_50px_rgba(255,255,255,0.05)]"
               />
-              <div className="absolute top-12 right-12">
-                <span className="px-5 py-2 border border-[#C9A63F]/30 rounded-full text-[9px] text-[#C9A63F] uppercase tracking-widest font-black bg-[#C9A63F]/5">
-                  Limited Edition
-                </span>
-              </div>
             </div>
           </div>
 
-          {/* CỘT PHẢI: Nội dung (5/12 cột) */}
-          <div className="lg:col-span-5 flex flex-col justify-center">
-            <div className="space-y-16">
-              {/* Name & Price */}
-              <div className="space-y-8">
-                <div className="flex items-center gap-4">
-                  <span className="h-[1px] w-12 bg-[#C9A63F]/40"></span>
-                  <p className="text-[#C9A63F] text-[10px] uppercase tracking-[0.5em] font-black">
-                    {product.category}
-                  </p>
-                </div>
-                <h1 className="text-white text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.85]">
-                  {product.name}
-                </h1>
-                <div className="flex items-baseline gap-6">
-                  <span className="text-[#C9A63F] text-5xl font-serif italic">
-                    {formatCurrency(product.price)}
-                  </span>
-                  <span className="text-gray-600 text-[10px] uppercase tracking-widest line-through decoration-[#C9A63F]/30">
-                    {formatCurrency(product.price * 1.2)}
-                  </span>
-                </div>
+          {/* PHẢI: NỘI DUNG CHI TIẾT (Mẫu chuẩn bạn muốn) */}
+          <div className="lg:col-span-7 space-y-8">
+            <div className="space-y-4">
+              <div className="inline-block px-3 py-1 bg-[#C9A63F]/10 border border-[#C9A63F]/20 rounded text-[10px] font-bold text-[#C9A63F] uppercase tracking-widest">
+                {product.category}
               </div>
-
-              {/* Description */}
-              <div className="space-y-8 border-t border-white/5 pt-12">
-                <h3 className="text-white text-[11px] uppercase tracking-[0.4em] font-bold opacity-40">
-                  Mô tả tinh phẩm
-                </h3>
-                <p className="text-gray-400 font-light leading-[1.8] text-xl italic font-serif">
-                  {product.description ||
-                    "Một tuyệt tác công nghệ hội tụ sự tinh giản và sức mạnh vượt trội, được thiết kế để nâng tầm trải nghiệm cá nhân của bạn."}
-                </p>
+              <h1 className="text-4xl md:text-5xl font-black leading-[1.1] tracking-tight text-white">
+                {product.name}
+              </h1>
+              <div className="flex items-center gap-6 text-sm">
+                <div className="flex items-center text-[#C9A63F] gap-1">
+                  <Star size={16} fill="currentColor" />
+                  <span className="font-bold">4.9</span>
+                </div>
+                <span className="text-gray-500">|</span>
+                <span className="text-gray-400">
+                  Đã bán <strong className="text-white ml-1">850+</strong>
+                </span>
               </div>
+            </div>
 
-              {/* Specs & Actions */}
-              <div className="space-y-12">
-                <div className="grid grid-cols-2 gap-10">
-                  <div className="flex gap-4">
-                    <ShieldCheck
-                      size={20}
-                      className="text-[#C9A63F] shrink-0"
-                    />
-                    <div>
-                      <span className="block text-white text-[10px] font-black uppercase tracking-widest">
-                        Bảo hành
-                      </span>
-                      <span className="text-gray-500 text-xs font-light tracking-wide">
-                        24 Tháng Chính Hãng
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <Truck size={20} className="text-[#C9A63F] shrink-0" />
-                    <div>
-                      <span className="block text-white text-[10px] font-black uppercase tracking-widest">
-                        Vận chuyển
-                      </span>
-                      <span className="text-gray-500 text-xs font-light tracking-wide">
-                        Premium Express
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-6 items-center pt-6">
-                  <AddToCartButton
-                    product={product}
-                    className="w-full sm:flex-1 py-7 bg-[#C9A63F] text-black font-black uppercase tracking-[0.4em] text-[10px] rounded-full hover:bg-white transition-all duration-500 shadow-[0_20px_50px_rgba(201,166,63,0.15)]"
-                  />
-                  <button className="w-full sm:w-20 h-20 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-500 group">
-                    <span className="group-hover:scale-125 transition-transform">
-                      ♥
-                    </span>
-                  </button>
-                </div>
+            {/* KHỐI GIÁ */}
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl p-8 flex flex-col gap-2">
+              <div className="flex items-end gap-4">
+                <span className="text-5xl font-bold text-[#C9A63F]">
+                  {formattedPrice}
+                </span>
+                <span className="text-lg text-gray-600 line-through mb-1">
+                  {oldPrice}
+                </span>
               </div>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-2">
+                Giá đã bao gồm thuế VAT và bảo hành chính hãng
+              </p>
+            </div>
 
-              {/* Trust badges */}
-              <div className="pt-12 flex justify-between items-center opacity-30 border-t border-white/5">
-                <div className="flex items-center gap-2 text-[8px] text-white uppercase tracking-widest font-bold">
-                  <Globe size={10} /> Worldwide Delivery
-                </div>
-                <div className="h-4 w-[1px] bg-white/20"></div>
-                <div className="text-[8px] text-white uppercase tracking-widest font-bold">
-                  Secure Payment
-                </div>
-                <div className="h-4 w-[1px] bg-white/20"></div>
-                <div className="text-[8px] text-white uppercase tracking-widest font-bold">
-                  VoltHome Authentic
-                </div>
+            {/* ƯU ĐÃI NÉT ĐỨT */}
+            <div className="p-4 border border-dashed border-[#C9A63F]/30 bg-[#C9A63F]/5 rounded-xl space-y-2">
+              <p className="text-xs font-bold text-[#C9A63F] uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#C9A63F] rounded-full animate-ping" />{" "}
+                Ưu đãi độc quyền
+              </p>
+              <ul className="text-xs text-gray-400 space-y-1 ml-4 list-disc">
+                <li>Giảm ngay 500.000đ khi thanh toán qua thẻ tín dụng</li>
+                <li>Tặng kèm bao da cao cấp trị giá 1.200.000đ</li>
+              </ul>
+            </div>
+
+            {/* SỐ LƯỢNG */}
+            <div className="flex items-center gap-8">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-500">
+                Số lượng
+              </span>
+              <div className="flex items-center bg-[#0A0A0A] border border-white/10 rounded-full px-2">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="p-3 text-gray-400 hover:text-white"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-10 text-center font-bold">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="p-3 text-gray-400 hover:text-white"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* NÚT BẤM */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => {
+                  for (let i = 0; i < quantity; i++) addItem(product);
+                  alert("Đã thêm vào giỏ hàng!");
+                }}
+                className="flex-[4] flex items-center justify-center gap-3 border-2 border-[#C9A63F] text-[#C9A63F] py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#C9A63F] hover:text-black transition-all"
+              >
+                <ShoppingCart size={18} /> Thêm vào giỏ
+              </button>
+              <button className="flex-[6] bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#C9A63F] transition-all shadow-[0_20px_40px_rgba(201,166,63,0.1)]">
+                Mua ngay
+              </button>
+            </div>
+
+            {/* CHÍNH SÁCH */}
+            <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/5">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <RotateCcw size={20} className="text-gray-500" />
+                <span className="text-[9px] uppercase font-bold text-gray-600">
+                  30 ngày đổi trả
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <ShieldCheck size={20} className="text-gray-500" />
+                <span className="text-[9px] uppercase font-bold text-gray-600">
+                  Bảo hành 2 năm
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <Truck size={20} className="text-gray-500" />
+                <span className="text-[9px] uppercase font-bold text-gray-600">
+                  Giao hàng miễn phí
+                </span>
               </div>
             </div>
           </div>

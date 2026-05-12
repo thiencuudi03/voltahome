@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
+import Link from "next/link"; // Đã thêm thư viện Link
 
 export default function Hero() {
   return (
-    // SỬA: Dùng min-h-[calc(100vh-80px)] để trừ đi chiều cao Header (thường là 80px)
     // THÊM: relative z-10 để tách lớp hoàn toàn với các Section bên dưới
     <section className="relative z-10 flex min-h-[calc(100vh-80px)] w-full items-center overflow-hidden bg-[#050505] font-sans">
       {/* Background Layer - z-0 để nằm dưới cùng */}
@@ -46,24 +46,26 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* Buttons - Đã xử lý suppressHydrationWarning */}
+          {/* Buttons - Đã chuyển thành thẻ Link */}
           <div className="flex flex-col sm:flex-row items-center gap-8">
-            <button
+            <Link
+              href="/products"
               suppressHydrationWarning={true}
-              className="w-full sm:w-auto flex items-center justify-center gap-4 px-12 py-5 bg-[#C9A63F] text-black font-black text-[13px] uppercase tracking-[0.15em] rounded-full hover:bg-white transition-all duration-300 shadow-[0_10px_30px_rgba(201,166,63,0.3)] hover:scale-105 active:scale-95 group"
+              className="w-full sm:w-auto flex items-center justify-center gap-4 px-12 py-5 bg-[#C9A63F] text-black font-black text-[13px] uppercase tracking-[0.15em] rounded-full hover:bg-white transition-all duration-300 shadow-[0_10px_30px_rgba(201,166,63,0.3)] hover:scale-105 active:scale-95 group text-center"
             >
               MUA NGAY
               <span className="group-hover:translate-x-1.5 transition-transform duration-300 text-lg">
                 →
               </span>
-            </button>
+            </Link>
 
-            <button
+            <Link
+              href="/about"
               suppressHydrationWarning={true}
-              className="w-full sm:w-auto px-12 py-5 border-2 border-[#C9A63F] text-white font-bold text-[13px] uppercase tracking-[0.15em] rounded-full hover:bg-[#C9A63F] hover:text-black transition-all duration-300 active:scale-95"
+              className="w-full sm:w-auto px-12 py-5 border-2 border-[#C9A63F] text-white font-bold text-[13px] uppercase tracking-[0.15em] rounded-full hover:bg-[#C9A63F] hover:text-black transition-all duration-300 active:scale-95 text-center"
             >
-              DANH MỤC SẢN PHẨM
-            </button>
+              GIỚI THIỆU
+            </Link>
           </div>
         </div>
       </div>

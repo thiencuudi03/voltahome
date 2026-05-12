@@ -1,24 +1,28 @@
 "use client";
 
 import React from "react";
+import Image from "next/image"; // Nhớ import thêm cái này
 
 export default function AboutSection() {
   return (
-    // py-32 tạo khoảng cách dọc lớn, giúp nội dung không bị méo hay dính vào Section khác
     <section className="relative bg-black py-32 px-6 md:px-20 border-t border-white/5 z-10">
       <div className="container mx-auto">
-        {/* Gap-16 đảm bảo khoảng cách giữa ảnh và chữ luôn thoáng */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Cột trái: Hình ảnh decor */}
+          {/* Cột trái: Hình ảnh decor - Đã tối ưu bằng Next.js Image */}
           <div className="relative overflow-hidden rounded-3xl group aspect-[4/5] lg:aspect-square">
-            <img
-              src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070"
+            <Image
+              // Link ảnh phong cách Luxury Tech, tông màu trầm hợp với VoltHome
+              src="/images/products/contacts.png"
               alt="VoltHome Premium Space"
-              className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-in-out"
+              fill // Thay thế cho w-full h-full
+              className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 ease-in-out"
+              // Thuộc tính sizes giúp fix lỗi performance của Next.js
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
             />
 
             {/* Badge Premium */}
-            <div className="absolute bottom-8 left-8 bg-[#C9A63F] px-8 py-5 rounded-2xl shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500">
+            <div className="absolute bottom-8 left-8 bg-[#C9A63F] px-8 py-5 rounded-2xl shadow-2xl transform group-hover:-translate-y-2 transition-transform duration-500 z-20">
               <p className="text-black font-black text-3xl italic leading-none tracking-tighter">
                 PREMIUM
               </p>
@@ -26,6 +30,9 @@ export default function AboutSection() {
                 Tiêu chuẩn quốc tế
               </p>
             </div>
+
+            {/* Lớp phủ để ảnh trông sâu hơn */}
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
           </div>
 
           {/* Cột phải: Nội dung văn bản */}
@@ -58,7 +65,6 @@ export default function AboutSection() {
               </p>
             </div>
 
-            {/* Nút bấm - Chống lỗi Hydration */}
             <div className="mt-12">
               <button
                 suppressHydrationWarning={true}

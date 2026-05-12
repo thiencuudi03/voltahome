@@ -1,4 +1,4 @@
-import { Product } from "../types/product";
+import { Product } from "@/types/product";
 
 export const mockProducts: Product[] = [
   {
@@ -6,7 +6,7 @@ export const mockProducts: Product[] = [
     name: 'MacBook Pro M3 Max 14" - Black Edition',
     description:
       "Chip M3 Max cực khủng với 14-core CPU và 30-core GPU, bộ nhớ thống nhất 36GB.",
-    price: 79990000,
+    price: 29000000,
     image: "/images/products/macbook-m3.png",
     category: "Laptop Premium",
     stock: 5,
@@ -17,7 +17,7 @@ export const mockProducts: Product[] = [
     name: "iPhone 15 Pro Max 256GB - Titanium",
     description:
       "Thiết kế Titan bền bỉ, chip A17 Pro mạnh mẽ nhất từng có trên smartphone.",
-    price: 34990000,
+    price: 4780000,
     image: "/images/products/iphone-15.png",
     category: "Điện thoại",
     stock: 12,
@@ -28,7 +28,7 @@ export const mockProducts: Product[] = [
     name: "Sony WH-1000XM5 Wireless Headphones",
     description:
       "Chống ồn đỉnh cao, chất âm trung thực, thời lượng pin lên đến 30 giờ.",
-    price: 8450000,
+    price: 450000,
     image: "/images/products/sony-wh1000xm5.png",
     category: "Thiết bị SmartHome",
     stock: 20,
@@ -50,9 +50,9 @@ export const mockProducts: Product[] = [
     name: 'iPad Pro M2 12.9" Liquid Retina XDR',
     description:
       "Màn hình hiển thị xuất sắc nhất thế giới, hỗ trợ Apple Pencil 2.",
-    price: 28990000,
+    price: 15000000,
     category: "Laptop Premium",
-    image: "/images/products/ipad-pro.png",
+    image: "/images/products/iPad Pro M2 12.9 Liquid Retina XDR.png",
     stock: 8,
     rating: 4.9,
   },
@@ -60,8 +60,8 @@ export const mockProducts: Product[] = [
     id: "6",
     name: "Samsung Galaxy S24 Ultra - Gray",
     description: "Tích hợp AI quyền năng, bút S-Pen tiện lợi và camera 200MP.",
-    price: 29990000,
-    image: "/images/products/s24-ultra.png",
+    price: 7420000,
+    image: "/images/products/Samsung Galaxy S24 Ultra - Gray.png",
     category: "Điện thoại",
     stock: 10,
     rating: 4.8,
