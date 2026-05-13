@@ -1,71 +1,217 @@
 "use client";
 
-import React from "react";
-import Link from "next/link"; // Đã thêm thư viện Link
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+  ShieldCheck,
+  CreditCard,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Dữ liệu cho Slider chính
+const slides = [
+  {
+    id: 1,
+    title: "ĐẶC QUYỀN MACBOOK",
+    subtitle: "GIẢM THẲNG 5 TRIỆU",
+    desc: "Tặng kèm Office 365 & Balo cao cấp. Trả góp 0% qua thẻ tín dụng.",
+    image: "/images/products/macbook-m3.png",
+    link: "/products",
+    bgColor: "from-gray-900 to-black",
+  },
+  {
+    id: 2,
+    title: "SAMSUNG GALAXY S24",
+    subtitle: "THU CŨ ĐỔI MỚI",
+    desc: "Trợ giá lên đời đến 3 triệu. Tặng ốp lưng & củ sạc 45W chính hãng.",
+    image: "/images/products/Samsung Galaxy S24 Ultra - Gray.png", // Bạn có thể thay đường dẫn ảnh thực tế
+    link: "/products",
+    bgColor: "from-[#0a0a0a] to-[#1a1a1a]",
+  },
+];
 
 export default function Hero() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Auto-play slider
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 5000); // 5 giây đổi ảnh 1 lần
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () =>
+    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+  const prevSlide = () =>
+    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+
   return (
-    // THÊM: relative z-10 để tách lớp hoàn toàn với các Section bên dưới
-    <section className="relative z-10 flex min-h-[calc(100vh-80px)] w-full items-center overflow-hidden bg-[#050505] font-sans">
-      {/* Background Layer - z-0 để nằm dưới cùng */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070"
-          alt=""
-          className="h-full w-full object-cover opacity-20 grayscale"
-          loading="eager"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/30" />
-      </div>
+    <section className="pt-28 pb-8 bg-[#050505]">
+      <div className="container mx-auto px-4 md:px-6">
+        {/* LƯỚI BỐ CỤC CHUẨN FPT SHOP (1 TO - 2 NHỎ) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* CỘT TRÁI: MAIN SLIDER (Chiếm 8 phần) */}
+          <div className="lg:col-span-8 relative rounded-2xl overflow-hidden bg-gradient-to-r from-gray-900 to-black border border-white/10 aspect-[16/9] md:aspect-[2/1] group">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 flex items-center"
+              >
+                <div className="w-1/2 p-8 md:p-12 z-10">
+                  <span className="inline-block py-1 px-3 bg-[#C9A63F]/20 text-[#C9A63F] border border-[#C9A63F]/50 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">
+                    Flash Sale
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-black text-white uppercase italic leading-tight mb-2">
+                    {slides[currentSlide].title}
+                  </h2>
+                  <h3 className="text-2xl md:text-4xl font-black text-[#C9A63F] mb-4">
+                    {slides[currentSlide].subtitle}
+                  </h3>
+                  <p className="text-gray-400 text-sm md:text-base hidden md:block mb-8">
+                    {slides[currentSlide].desc}
+                  </p>
+                  <Link
+                    href={slides[currentSlide].link}
+                    className="inline-block px-8 py-3 bg-[#C9A63F] text-black font-bold uppercase text-xs rounded-lg hover:bg-white transition-colors shadow-[0_0_20px_rgba(201,166,63,0.3)]"
+                  >
+                    Mua ngay
+                  </Link>
+                </div>
 
-      {/* Main Content Area - z-10 */}
-      <div className="relative z-10 container mx-auto px-6 md:px-20 py-20">
-        <div className="max-w-3xl">
-          {/* Title Section */}
-          <div className="relative mb-12">
-            {/* Chữ TECH nền - z-0 */}
-            <span className="pointer-events-none absolute -top-20 left-0 select-none text-[100px] font-black tracking-tight text-white/[0.03] md:text-[180px] z-0">
-              TECH
-            </span>
+                <div className="w-1/2 h-full relative">
+                  <Image
+                    src={slides[currentSlide].image}
+                    alt={slides[currentSlide].title}
+                    fill
+                    className="object-contain p-4 md:p-8 scale-110 drop-shadow-2xl"
+                  />
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
-            <h1 className="relative z-10 leading-[1.1] text-white">
-              <span className="block text-4xl font-serif italic tracking-tight text-white/95 md:text-6xl">
-                CÔNG NGHỆ
-              </span>
-              <span className="mt-4 block text-[50px] font-black uppercase tracking-[0.05em] md:text-8xl">
-                ĐỈNH CAO
-              </span>
-            </h1>
+            {/* Nút điều hướng Slider */}
+            <button
+              onClick={prevSlide}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-[#C9A63F] text-white hover:text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-md"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-[#C9A63F] text-white hover:text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-md"
+            >
+              <ChevronRight size={24} />
+            </button>
+
+            {/* Chấm tròn (Dots) */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    currentSlide === index
+                      ? "w-6 bg-[#C9A63F]"
+                      : "w-2 bg-white/30"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Description */}
-          <div className="mb-16">
-            <p className="max-w-xl border-l-2 border-[#C9A63F]/40 pl-5 text-base leading-loose text-gray-300 md:text-lg italic font-light">
-              Trải nghiệm thiết bị điện tử hiện đại với thiết kế tối giản dành
-              cho thế hệ mới tại VoltHome.
-            </p>
+          {/* CỘT PHẢI: 2 BANNER PHỤ (Chiếm 4 phần) */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
+            {/* Banner Phụ 1 */}
+            <div className="flex-1 rounded-2xl bg-[#0A0A0A] border border-white/10 p-6 flex flex-col justify-center relative overflow-hidden group hover:border-[#C9A63F]/50 transition-colors">
+              <div className="relative z-10 w-2/3">
+                <span className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-wider block mb-1">
+                  Đại tiệc âm thanh
+                </span>
+                <h4 className="text-xl font-black text-white mb-2">
+                  SONY WH-1000XM5
+                </h4>
+                <p className="text-gray-400 text-xs mb-4">
+                  Giá hủy diệt chỉ từ 6.990.000đ
+                </p>
+                <Link
+                  href="/products"
+                  className="text-xs font-bold text-white hover:text-[#C9A63F] flex items-center gap-1"
+                >
+                  Xem chi tiết <ChevronRight size={14} />
+                </Link>
+              </div>
+              <div className="absolute right-[-20%] bottom-[-20%] w-[60%] h-[120%] group-hover:scale-110 transition-transform duration-500">
+                <Image
+                  src="/images/products/sony-wh1000xm5.png"
+                  alt="Sony"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Banner Phụ 2 */}
+            <div className="flex-1 rounded-2xl bg-[#0A0A0A] border border-white/10 p-6 flex flex-col justify-center relative overflow-hidden group hover:border-[#C9A63F]/50 transition-colors">
+              <div className="relative z-10 w-2/3">
+                <span className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-wider block mb-1">
+                  Mở bán giới hạn
+                </span>
+                <h4 className="text-xl font-black text-white mb-2">
+                  IPHONE 15 PRO
+                </h4>
+                <p className="text-gray-400 text-xs mb-4">
+                  Trả góp 0% - Duyệt hồ sơ 5 phút
+                </p>
+                <Link
+                  href="/products"
+                  className="text-xs font-bold text-white hover:text-[#C9A63F] flex items-center gap-1"
+                >
+                  Đăng ký ngay <ChevronRight size={14} />
+                </Link>
+              </div>
+              <div className="absolute right-[-10%] bottom-[-10%] w-[50%] h-[120%] group-hover:scale-110 transition-transform duration-500">
+                <Image
+                  src="/images/products/iphone-15.png"
+                  alt="iPhone 15"
+                  fill
+                  className="object-contain drop-shadow-xl"
+                />
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Buttons - Đã chuyển thành thẻ Link */}
-          <div className="flex flex-col sm:flex-row items-center gap-8">
-            <Link
-              href="/products"
-              suppressHydrationWarning={true}
-              className="w-full sm:w-auto flex items-center justify-center gap-4 px-12 py-5 bg-[#C9A63F] text-black font-black text-[13px] uppercase tracking-[0.15em] rounded-full hover:bg-white transition-all duration-300 shadow-[0_10px_30px_rgba(201,166,63,0.3)] hover:scale-105 active:scale-95 group text-center"
-            >
-              MUA NGAY
-              <span className="group-hover:translate-x-1.5 transition-transform duration-300 text-lg">
-                →
-              </span>
-            </Link>
-
-            <Link
-              href="/about"
-              suppressHydrationWarning={true}
-              className="w-full sm:w-auto px-12 py-5 border-2 border-[#C9A63F] text-white font-bold text-[13px] uppercase tracking-[0.15em] rounded-full hover:bg-[#C9A63F] hover:text-black transition-all duration-300 active:scale-95 text-center"
-            >
-              GIỚI THIỆU
-            </Link>
+        {/* THANH TIỆN ÍCH DƯỚI BANNER (Giống FPT/TGDD) */}
+        <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-white/5">
+          <div className="flex items-center gap-3 text-gray-400 justify-center">
+            <ShieldCheck className="text-[#C9A63F]" size={24} />
+            <div className="text-sm">
+              <p className="text-white font-bold">100% Chính hãng</p>
+              <p className="text-xs font-light">Bảo hành uy tín</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-gray-400 justify-center border-l border-white/5">
+            <Zap className="text-[#C9A63F]" size={24} />
+            <div className="text-sm">
+              <p className="text-white font-bold">Giao hàng 2H</p>
+              <p className="text-xs font-light">Miễn phí nội thành</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-gray-400 justify-center border-l border-white/5">
+            <CreditCard className="text-[#C9A63F]" size={24} />
+            <div className="text-sm">
+              <p className="text-white font-bold">Trả góp 0%</p>
+              <p className="text-xs font-light">Qua thẻ tín dụng</p>
+            </div>
           </div>
         </div>
       </div>
