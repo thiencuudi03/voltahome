@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image"; // Import thành phần Image tối ưu
 import { Mail, MapPin, Phone, Send, Clock } from "lucide-react";
 
 export default function ContactPage() {
@@ -77,13 +78,15 @@ export default function ContactPage() {
               ))}
             </div>
 
-            {/* Bản đồ hoặc hình ảnh minh họa */}
+            {/* ĐÃ TỐI ƯU: Sử dụng Next.js Image thay cho img */}
             <div className="aspect-video w-full rounded-[2rem] overflow-hidden border border-white/5 grayscale hover:grayscale-0 transition-all duration-1000 relative">
-              <div className="absolute inset-0 bg-[#C9A63F]/10 mix-blend-overlay" />
-              <img
+              <div className="absolute inset-0 bg-[#C9A63F]/10 mix-blend-overlay z-10 pointer-events-none" />
+              <Image
                 src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
                 alt="VoltHome Office"
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                className="object-cover transition-transform duration-1000 group-hover:scale-110"
               />
             </div>
           </div>

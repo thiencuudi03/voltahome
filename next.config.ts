@@ -1,14 +1,15 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "images.unsplash.com",
-        pathname: "**", // Thêm dòng này để cho phép tất cả các đường dẫn ảnh từ Unsplash
+        pathname: "/**",
       },
     ],
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

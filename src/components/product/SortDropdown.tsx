@@ -3,7 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
-export default function SortDropdown() {
+// Thêm interface để nhận hàm callback từ component cha
+interface SortDropdownProps {
+  onSortChange: (option: string) => void;
+}
+
+export default function SortDropdown({ onSortChange }: SortDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Mặc định");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -24,9 +29,16 @@ export default function SortDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleSelect = (option: string) => {
+    setSelected(option);
+    setIsOpen(false);
+    onSortChange(option); // Gọi hàm để báo về cho Products/page.tsx
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        suppressHydrationWarning // THÊM DÒNG NÀY ĐỂ FIX LỖI HYDRATION
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 bg-transparent text-white text-xs uppercase tracking-widest font-bold focus:outline-none cursor-pointer group"
       >
@@ -43,11 +55,7 @@ export default function SortDropdown() {
           {options.map((option) => (
             <li
               key={option}
-              onClick={() => {
-                setSelected(option);
-                setIsOpen(false);
-                // Sau này bạn có thể viết thêm logic sắp xếp sản phẩm ở đây
-              }}
+              onClick={() => handleSelect(option)}
               className={`px-6 py-3 text-[10px] uppercase tracking-widest cursor-pointer transition-all duration-300 ${
                 selected === option
                   ? "text-[#C9A63F] bg-white/5 font-black"

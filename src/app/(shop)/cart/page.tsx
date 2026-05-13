@@ -99,7 +99,7 @@ export default function CartPage() {
                   </p>
                 </div>
 
-                {/* BỘ ĐIỀU KHIỂN (GIỮ NGUYÊN KHÔNG BỌC LINK) */}
+                {/* BỘ ĐIỀU KHIỂN */}
                 <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="flex items-center border border-white/10 rounded-full bg-white/5">
                     <button
@@ -155,14 +155,13 @@ export default function CartPage() {
               </div>
             </div>
 
-            <button
-              onClick={() =>
-                alert("Hệ thống đang kết nối cổng thanh toán VIP...")
-              }
+            {/* ĐÃ SỬA THÀNH THẺ LINK ĐỂ ĐI TỚI TRANG CHECKOUT */}
+            <Link
+              href="/checkout"
               className="w-full flex items-center justify-center gap-3 bg-[#C9A63F] text-black py-5 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:bg-white transition-all duration-300"
             >
               Thanh toán ngay <ArrowRight size={16} />
-            </button>
+            </Link>
 
             <div className="mt-6 flex items-center justify-center gap-2 text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em]">
               <ShieldCheck size={14} /> Bảo mật thanh toán bởi VoltHome
