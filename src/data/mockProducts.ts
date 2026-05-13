@@ -12,6 +12,7 @@ export const mockProducts: Product[] = [
     price: 29000000,
     image: "/images/products/macbook-m3.png",
     images: [
+      "/images/products/macbook-m3.png",
       "/images/products/macbook-m4.png",
       "/images/products/macbook-m5.png",
       "/images/products/macbook-m6.png",
