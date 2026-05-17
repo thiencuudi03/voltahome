@@ -1,51 +1,127 @@
-// PHẦN ĐĂNG KI & ĐĂNG NHAP
-
+// src/app/(shop)/login/page.tsx
 "use client";
 
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import React, { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation"; // Thêm thư viện điều hướng
 import { Mail, Lock, User, ArrowRight, AlertCircle } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { useAuthStore } from "@/store/authStore";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // Các state để lưu dữ liệu người dùng nhập
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Hàm xử lý logic khi nhấn nút Submit
-  const handleAuth = (e: React.FormEvent) => {
-    e.preventDefault(); // Ngăn trang bị load lại
-    setErrorMsg(""); // Xóa thông báo lỗi cũ (nếu có)
+  const handleGoogleLogin = async () => {
+    setErrorMsg("");
+    setLoading(true);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
 
-    if (isLogin) {
-      // ĐANG Ở TAB ĐĂNG NHẬP: Giả lập kiểm tra tài khoản
-      if (email === "vip@gmail.com" && password === "123456") {
-        router.push("/account"); // Đăng nhập thành công -> Vào account
-      } else {
-        // Đăng nhập thất bại
-        setErrorMsg(
-          "Tài khoản chưa tồn tại hoặc sai mật khẩu. Vui lòng đăng ký!",
+    try {
+      const result = await signInWithPopup(auth, provider);
+      if (result?.user) {
+        // [THÊM MỚI] Ghi nhận user từ Google vào Firestore
+        // Dùng merge: true để nếu tài khoản này đã có wishlist rồi thì không bị ghi đè mất
+        await setDoc(
+          doc(db, "users", result.user.uid),
+          {
+            email: result.user.email,
+            name: result.user.displayName || "",
+          },
+          { merge: true },
         );
+
+        useAuthStore.setState({ user: result.user, isLoading: false });
+        window.location.href = "/account";
       }
-    } else {
-      // ĐANG Ở TAB ĐĂNG KÝ: Giả lập tạo tài khoản thành công
-      alert("Tạo tài khoản VIP thành công! Vui lòng đăng nhập lại.");
-      setIsLogin(true); // Chuyển ngược về tab Đăng nhập
-      setPassword(""); // Xóa trắng mật khẩu
+    } catch (err: any) {
+      setErrorMsg("Xác thực Google bị hủy hoặc thất bại.");
+      setLoading(false);
     }
   };
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
+        useAuthStore.setState({ user: userCredential.user, isLoading: false });
+        window.location.href = "/account";
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
+        if (name && userCredential.user) {
+          await updateProfile(userCredential.user, { displayName: name });
+        }
+
+        // [THÊM MỚI] Khởi tạo Document trên Firestore kèm wishlist rỗng cho tài khoản đăng ký mới
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          email: email,
+          name: name || "",
+          wishlist: [],
+          createdAt: new Date().toISOString(),
+        });
+
+        useAuthStore.setState({ user: userCredential.user, isLoading: false });
+        window.location.href = "/account";
+      }
+    } catch (err: any) {
+      setLoading(false);
+      if (
+        err.code === "auth/user-not-found" ||
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/invalid-credential"
+      ) {
+        setErrorMsg("Email hoặc mật khẩu không chính xác.");
+      } else if (err.code === "auth/email-already-in-use") {
+        setErrorMsg("Email này đã được sử dụng!");
+      } else {
+        setErrorMsg("Xác thực hệ thống thất bại. Vui lòng thử lại!");
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#050505] flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-4 border-white/10 border-t-[#C9A63F] rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-500 text-xs font-bold uppercase tracking-widest tracking-[0.15em]">
+          Đang xác thực hệ thống...
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#050505] flex items-center justify-center px-6 pt-32 pb-20 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#C9A63F]/5 blur-[150px] rounded-full pointer-events-none" />
-
       <div className="w-full max-w-lg bg-[#0A0A0A] border border-white/5 rounded-[3rem] p-8 md:p-14 relative z-10 shadow-2xl">
         <div className="flex gap-8 border-b border-white/10 mb-10 pb-4">
           <button
+            type="button"
             onClick={() => {
               setIsLogin(true);
               setErrorMsg("");
@@ -55,6 +131,7 @@ export default function LoginPage() {
             Đăng nhập
           </button>
           <button
+            type="button"
             onClick={() => {
               setIsLogin(false);
               setErrorMsg("");
@@ -65,18 +142,16 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Form gọi hàm handleAuth khi nhấn Enter hoặc bấm nút */}
         <form onSubmit={handleAuth} className="space-y-6">
-          {/* Vùng hiển thị thông báo lỗi */}
           {errorMsg && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-bold p-4 rounded-2xl flex items-center gap-3 animate-in fade-in zoom-in duration-300">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-bold p-4 rounded-2xl flex items-center gap-3">
               <AlertCircle size={16} />
               {errorMsg}
             </div>
           )}
 
           {!isLogin && (
-            <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="space-y-2">
               <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-4">
                 Họ và tên
               </label>
@@ -88,13 +163,14 @@ export default function LoginPage() {
                 <input
                   required
                   type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="Nguyễn Văn A"
                   className="w-full bg-white/5 border border-white/10 rounded-full pl-14 pr-6 py-4 outline-none focus:border-[#C9A63F]/50 focus:bg-white/10 transition-all text-sm text-white"
                 />
               </div>
             </div>
           )}
-
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-4">
               Email
@@ -114,7 +190,6 @@ export default function LoginPage() {
               />
             </div>
           </div>
-
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-4">
               Mật khẩu
@@ -129,24 +204,11 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="123456"
+                placeholder="••••••"
                 className="w-full bg-white/5 border border-white/10 rounded-full pl-14 pr-6 py-4 outline-none focus:border-[#C9A63F]/50 focus:bg-white/10 transition-all text-sm text-white"
               />
             </div>
           </div>
-
-          {isLogin && (
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                className="text-xs uppercase tracking-widest font-bold text-gray-500 hover:text-[#C9A63F] transition-colors"
-              >
-                Quên mật khẩu?
-              </button>
-            </div>
-          )}
-
-          {/* Nút Submit đã đổi từ Link thành button type="submit" để kích hoạt hàm */}
           <button
             type="submit"
             className="w-full flex items-center justify-center gap-3 bg-[#C9A63F] text-black py-5 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:bg-white transition-all duration-500 mt-8 group"
@@ -164,7 +226,11 @@ export default function LoginPage() {
             Hoặc tiếp tục với
           </p>
           <div className="flex gap-4 justify-center">
-            <button className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-[#C9A63F]/50 transition-all text-gray-300 hover:text-white">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-[#C9A63F]/50 transition-all text-gray-300 hover:text-white"
+            >
               <span className="font-bold text-xl">G</span>
             </button>
           </div>

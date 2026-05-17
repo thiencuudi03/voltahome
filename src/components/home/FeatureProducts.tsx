@@ -1,40 +1,53 @@
-import { mockProducts } from "@/data/mockProducts";
-import ProductCard from "../product/ProductCard";
+"use client"; // Thêm dòng này để biến thành Client Component
 
-export default function FeaturedProducts() {
+import React, { useState, useEffect } from "react";
+import { getFirebaseProducts } from "@/services/productService";
+import ProductCard from "@/components/product/ProductCard";
+import { Product } from "@/types/product";
+
+export default function FeatureProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Lấy dữ liệu khi component được mount trên trình duyệt
+    const fetchProducts = async () => {
+      try {
+        const data = await getFirebaseProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sản phẩm:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
-    <section className="relative z-10 py-20 px-6 md:px-20 bg-[#050505]">
-      <div className="max-w-[1700px] mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-          <div className="space-y-4">
-            {/* SỬA: Giảm tracking từ [0.8em] xuống [0.3em] để chữ gọn và sang hơn */}
-            <h4 className="text-[#C9A63F] text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold opacity-60">
-              Selected Tech
-            </h4>
+    <section className="py-20 bg-[#050505]">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 text-center">
+          Sản Phẩm <span className="text-[#C9A63F]">Nổi Bật</span>
+        </h2>
 
-            {/* Giữ nguyên text-7xl đã tinh chỉnh ở bước trước */}
-            <h2 className="text-white text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9]">
-              SẢN PHẨM <br />
-              <span className="text-[#C9A63F]">TIÊU BIỂU</span>
-            </h2>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-40">
+            {/* Hiệu ứng loading quay vòng màu vàng */}
+            <div className="w-8 h-8 border-4 border-white/10 border-t-[#C9A63F] rounded-full animate-spin"></div>
           </div>
-
-          <button
-            suppressHydrationWarning
-            className="text-gray-500 text-[10px] md:text-xs uppercase tracking-[0.3em] hover:text-white transition-all pb-2 border-b border-white/10 mb-2 group shrink-0"
-          >
-            Khám phá tất cả{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-2">
-              →
-            </span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
-          {mockProducts.slice(0, 6).map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        ) : products.length === 0 ? (
+          <p className="text-center text-gray-400">
+            Chưa có sản phẩm nào trên hệ thống.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -5,6 +5,8 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
+// 1. IMPORT COMPONENT NÚT YÊU THÍCH TỪ BƯỚC TRƯỚC
+import FavoriteButton from "./FavoriteButton";
 
 export default function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((state) => state.addItem);
@@ -35,6 +37,19 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* Nhãn ưu đãi bo tròn */}
         <div className="absolute top-4 left-4 bg-black text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider z-10">
           Mới
+        </div>
+
+        {/* 2. NÚT YÊU THÍCH Ở GÓC TRÊN BÊN PHẢI */}
+        <div
+          className="absolute top-4 right-4 z-20"
+          onClick={(e) => {
+            // Chặn sự kiện nhảy trang khi bấm thả tim
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {/* Lấy ID sản phẩm truyền vào nút */}
+          <FavoriteButton productId={product.id.toString()} />
         </div>
       </div>
 

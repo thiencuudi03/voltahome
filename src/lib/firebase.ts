@@ -1,10 +1,9 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-// Cấu hình chuẩn từ dự án VoltHome của bạn
 const firebaseConfig = {
-  apiKey: "AIzaSyAEheVYcPSpewELk6qsUk8rDjA2j-bHL20",
+  apiKey: "AIzaSyAEhEVycPSpewELk6qsUk8rDjA2j-bHL20",
   authDomain: "volthome-afcc8.firebaseapp.com",
   projectId: "volthome-afcc8",
   storageBucket: "volthome-afcc8.firebasestorage.app",
@@ -13,9 +12,16 @@ const firebaseConfig = {
   measurementId: "G-YKZSKCL2R4",
 };
 
-// Khởi tạo Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app;
+let db: ReturnType<typeof getFirestore>;
 
-// ĐÂY LÀ 2 DÒNG QUAN TRỌNG BỊ MẤT TÍCH NÈ:
-export const db = getFirestore(app);
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+  db = initializeFirestore(app, { experimentalForceLongPolling: true });
+} else {
+  app = getApp();
+  db = getFirestore(app);
+}
+
 export const auth = getAuth(app);
+export { db };

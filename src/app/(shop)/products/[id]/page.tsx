@@ -24,6 +24,9 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from "@/types/product";
 
+// 1. IMPORT NÚT YÊU THÍCH
+import FavoriteButton from "@/components/product/FavoriteButton";
+
 export default function ProductDetailPage() {
   const params = useParams();
   const addItem = useCartStore((state) => state.addItem);
@@ -92,7 +95,7 @@ export default function ProductDetailPage() {
         ref={detailRef}
         className="mt-32 pt-20 border-t border-white/5 pb-20"
       >
-        <h2 className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-[0.5em] mb-20 text-center">
+        <h2 className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-[0.25em] mb-20 text-center">
           — Tuyệt tác công nghệ —
         </h2>
 
@@ -183,7 +186,7 @@ export default function ProductDetailPage() {
                 />
               </div>
 
-              {/* SỐ THỨ TỰ ẢNH (ĐÃ QUAY TRỞ LẠI) */}
+              {/* SỐ THỨ TỰ ẢNH */}
               <div className="absolute bottom-6 left-6 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold tracking-widest text-[#C9A63F] z-10">
                 {currentIndex + 1} / {galleryImages.length}
               </div>
@@ -301,8 +304,8 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* SỐ LƯỢNG (Đã được kiểm tra kỹ) */}
-            <div className="flex items-center gap-8 pt-4">
+            {/* SỐ LƯỢNG & NÚT TƯƠNG TÁC (Đã bổ sung nút Yêu Thích) */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 pt-4">
               <div className="flex items-center bg-[#0A0A0A] border border-white/10 rounded-full px-2">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -320,9 +323,10 @@ export default function ProductDetailPage() {
                   <Plus size={16} />
                 </button>
               </div>
+
               <button
                 onClick={() => {
-                  for (let i = 0; i < quantity; i++) addItem(product);
+                  addItem(product, quantity);
                   toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ!`, {
                     position: "bottom-right",
                   });
@@ -331,11 +335,16 @@ export default function ProductDetailPage() {
               >
                 <ShoppingCart size={18} /> Thêm vào giỏ hàng
               </button>
+
+              {/* 2. CHÈN COMPONENT NÚT YÊU THÍCH VÀO ĐÂY */}
+              <div className="flex items-center justify-center scale-125 ml-2">
+                <FavoriteButton productId={product.id.toString()} />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* PHẦN MÔ TẢ CHI TIẾT (Nếu thêm 3-4 nội dung nó sẽ ẩn bớt sau nút bấm) */}
+        {/* PHẦN MÔ TẢ CHI TIẾT */}
         {renderDetailedDescription()}
       </div>
     </main>

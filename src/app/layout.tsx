@@ -3,7 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Toaster } from "sonner"; //
+import { Toaster } from "sonner";
+import AuthInitializer from "@/components/providers/AuthInitializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,19 +22,16 @@ export default function RootLayout({
     <html lang="vi" className="dark" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        // Đã xóa overflow-x-hidden để Lenis Scroll hoạt động mượt
         className={`${inter.className} bg-[#050505] text-white min-h-screen flex flex-col w-full`}
       >
-        <Header />
+        <AuthInitializer>
+          <Header />
+          <main className="flex-1 pt-20 flex flex-col w-full relative overflow-x-hidden">
+            {children}
+          </main>
+          <Footer />
+        </AuthInitializer>
 
-        {/* Chuyển overflow-x-hidden xuống main. Đổi mt-20 thành pt-20 */}
-        <main className="flex-1 pt-20 flex flex-col w-full relative overflow-x-hidden">
-          {children}
-        </main>
-
-        <Footer />
-
-        {/* Cấu hình Toaster với phong cách Luxury phù hợp giao diện */}
         <Toaster
           position="top-right"
           richColors
@@ -41,7 +39,7 @@ export default function RootLayout({
           toastOptions={{
             style: {
               background: "#0A0A0A",
-              border: "1px solid rgba(201, 166, 63, 0.2)", // Viền vàng nhẹ
+              border: "1px solid rgba(201, 166, 63, 0.2)",
               color: "#fff",
             },
           }}
