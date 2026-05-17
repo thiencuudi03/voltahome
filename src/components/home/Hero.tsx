@@ -12,205 +12,214 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Dữ liệu cho Slider chính
-const slides = [
+// Dữ liệu cho Banner lớn trải dài ở trên
+const topBanners = [
+  { id: 1, image: "/images/products/bn-m1.png", link: "/offers" },
+  { id: 2, image: "/images/products/bn-m2.png", link: "/offers" },
+];
+
+// Dữ liệu cho cụm 3 hình bên dưới
+const gridSlides = [
   {
     id: 1,
     title: "ĐẶC QUYỀN MACBOOK",
     subtitle: "GIẢM THẲNG 5 TRIỆU",
-    desc: "Tặng kèm Office 365 & Balo cao cấp. Trả góp 0% qua thẻ tín dụng.",
     image: "/images/products/macbook-m3.png",
     link: "/products",
-    bgColor: "from-gray-900 to-black",
   },
   {
     id: 2,
     title: "SAMSUNG GALAXY S24",
     subtitle: "THU CŨ ĐỔI MỚI",
-    desc: "Trợ giá lên đời đến 3 triệu. Tặng ốp lưng & củ sạc 45W chính hãng.",
-    image: "/images/products/Samsung Galaxy S24 Ultra - Gray.png", // Bạn có thể thay đường dẫn ảnh thực tế
+    image: "/images/products/Samsung Galaxy S24 Ultra - Gray.png",
     link: "/products",
-    bgColor: "from-[#0a0a0a] to-[#1a1a1a]",
   },
 ];
 
 export default function Hero() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentTop, setCurrentTop] = useState(0);
+  const [currentGrid, setCurrentGrid] = useState(0);
 
-  // Auto-play slider
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 5000); // 5 giây đổi ảnh 1 lần
-    return () => clearInterval(timer);
+    const topTimer = setInterval(() => {
+      setCurrentTop((prev) => (prev === topBanners.length - 1 ? 0 : prev + 1));
+    }, 6000);
+    const gridTimer = setInterval(() => {
+      setCurrentGrid((prev) => (prev === gridSlides.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => {
+      clearInterval(topTimer);
+      clearInterval(gridTimer);
+    };
   }, []);
 
-  const nextSlide = () =>
-    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-  const prevSlide = () =>
-    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-
   return (
-    <section className="pt-28 pb-8 bg-[#050505]">
+    <section className="pt-24 pb-12 bg-[#050505]">
       <div className="container mx-auto px-4 md:px-6">
-        {/* LƯỚI BỐ CỤC CHUẨN FPT SHOP (1 TO - 2 NHỎ) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* CỘT TRÁI: MAIN SLIDER (Chiếm 8 phần) */}
-          <div className="lg:col-span-8 relative rounded-2xl overflow-hidden bg-gradient-to-r from-gray-900 to-black border border-white/10 aspect-[16/9] md:aspect-[2/1] group">
+        <div className="flex flex-col gap-6 md:gap-8">
+          {/* --- BANNER LỚN TRÊN CÙNG: ÉP TỈ LỆ DẸT CỰC ĐẠI --- */}
+          {/* lg:aspect-[6/1] giúp banner cực dài và mỏng giống FPT Shop */}
+          <div className="w-full relative rounded-2xl md:rounded-3xl overflow-hidden aspect-[2.2/1] sm:aspect-[3/1] md:aspect-[4/1] lg:aspect-[6/1] group shadow-2xl border border-white/5 bg-[#111]">
             <AnimatePresence mode="wait">
               <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0 flex items-center"
+                key={currentTop}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0"
               >
-                <div className="w-1/2 p-8 md:p-12 z-10">
-                  <span className="inline-block py-1 px-3 bg-[#C9A63F]/20 text-[#C9A63F] border border-[#C9A63F]/50 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">
-                    Flash Sale
-                  </span>
-                  <h2 className="text-3xl md:text-5xl font-black text-white uppercase italic leading-tight mb-2">
-                    {slides[currentSlide].title}
-                  </h2>
-                  <h3 className="text-2xl md:text-4xl font-black text-[#C9A63F] mb-4">
-                    {slides[currentSlide].subtitle}
-                  </h3>
-                  <p className="text-gray-400 text-sm md:text-base hidden md:block mb-8">
-                    {slides[currentSlide].desc}
-                  </p>
-                  <Link
-                    href={slides[currentSlide].link}
-                    className="inline-block px-8 py-3 bg-[#C9A63F] text-black font-bold uppercase text-xs rounded-lg hover:bg-white transition-colors shadow-[0_0_20px_rgba(201,166,63,0.3)]"
-                  >
-                    Mua ngay
-                  </Link>
-                </div>
-
-                <div className="w-1/2 h-full relative">
+                <Link
+                  href={topBanners[currentTop].link}
+                  className="relative block w-full h-full"
+                >
                   <Image
-                    src={slides[currentSlide].image}
-                    alt={slides[currentSlide].title}
+                    src={topBanners[currentTop].image}
+                    alt="VoltHome Main Promo"
                     fill
-                    className="object-contain p-4 md:p-8 scale-110 drop-shadow-2xl"
+                    priority
+                    className="object-cover" // Giữ tỉ lệ ảnh gốc, không bị bóp méo
                   />
-                </div>
+                </Link>
               </motion.div>
             </AnimatePresence>
 
-            {/* Nút điều hướng Slider */}
             <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-[#C9A63F] text-white hover:text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-md"
+              onClick={() =>
+                setCurrentTop((prev) =>
+                  prev === 0 ? topBanners.length - 1 : prev - 1,
+                )
+              }
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-sm"
             >
               <ChevronLeft size={24} />
             </button>
             <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-[#C9A63F] text-white hover:text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-md"
+              onClick={() =>
+                setCurrentTop((prev) =>
+                  prev === topBanners.length - 1 ? 0 : prev + 1,
+                )
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-sm"
             >
               <ChevronRight size={24} />
             </button>
-
-            {/* Chấm tròn (Dots) */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    currentSlide === index
-                      ? "w-6 bg-[#C9A63F]"
-                      : "w-2 bg-white/30"
-                  }`}
-                />
-              ))}
-            </div>
           </div>
 
-          {/* CỘT PHẢI: 2 BANNER PHỤ (Chiếm 4 phần) */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            {/* Banner Phụ 1 */}
-            <div className="flex-1 rounded-2xl bg-[#0A0A0A] border border-white/10 p-6 flex flex-col justify-center relative overflow-hidden group hover:border-[#C9A63F]/50 transition-colors">
-              <div className="relative z-10 w-2/3">
-                <span className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-wider block mb-1">
-                  Đại tiệc âm thanh
-                </span>
-                <h4 className="text-xl font-black text-white mb-2">
-                  SONY WH-1000XM5
-                </h4>
-                <p className="text-gray-400 text-xs mb-4">
-                  Giá hủy diệt chỉ từ 6.990.000đ
-                </p>
-                <Link
-                  href="/products"
-                  className="text-xs font-bold text-white hover:text-[#C9A63F] flex items-center gap-1"
-                >
-                  Xem chi tiết <ChevronRight size={14} />
-                </Link>
-              </div>
-              <div className="absolute right-[-20%] bottom-[-20%] w-[60%] h-[120%] group-hover:scale-110 transition-transform duration-500">
-                <Image
-                  src="/images/products/sony-wh1000xm5.png"
-                  alt="Sony"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            </div>
+          {/* --- CỤM 3 BỐ CỤC ĐÓNG KHUNG (1 TO - 2 NHỎ) --- */}
+          <div className="relative w-full rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden p-4 md:p-8 bg-[#0f0f0f] border border-white/10 shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#C9A63F]/5 via-transparent to-transparent opacity-40 pointer-events-none" />
 
-            {/* Banner Phụ 2 */}
-            <div className="flex-1 rounded-2xl bg-[#0A0A0A] border border-white/10 p-6 flex flex-col justify-center relative overflow-hidden group hover:border-[#C9A63F]/50 transition-colors">
-              <div className="relative z-10 w-2/3">
-                <span className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-wider block mb-1">
-                  Mở bán giới hạn
-                </span>
-                <h4 className="text-xl font-black text-white mb-2">
-                  IPHONE 15 PRO
-                </h4>
-                <p className="text-gray-400 text-xs mb-4">
-                  Trả góp 0% - Duyệt hồ sơ 5 phút
-                </p>
-                <Link
-                  href="/products"
-                  className="text-xs font-bold text-white hover:text-[#C9A63F] flex items-center gap-1"
-                >
-                  Đăng ký ngay <ChevronRight size={14} />
-                </Link>
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5">
+              {/* Slider 1 To */}
+              <div className="lg:col-span-8 relative rounded-2xl md:rounded-[2rem] overflow-hidden bg-black border border-white/5 aspect-[16/9] md:aspect-[2/1] group">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentGrid}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="absolute inset-0 flex items-center"
+                  >
+                    <div className="w-1/2 p-6 md:p-12 z-20">
+                      <h2 className="text-xl md:text-3xl font-black text-white uppercase italic leading-none mb-3">
+                        {gridSlides[currentGrid].title}
+                      </h2>
+                      <p className="text-[#C9A63F] font-bold text-sm md:text-xl mb-6">
+                        {gridSlides[currentGrid].subtitle}
+                      </p>
+                      <Link
+                        href={gridSlides[currentGrid].link}
+                        className="inline-block px-8 py-3 bg-[#C9A63F] text-black font-black text-[10px] md:text-xs rounded-xl uppercase hover:bg-white transition-all"
+                      >
+                        Mua ngay
+                      </Link>
+                    </div>
+                    <div className="w-1/2 h-full relative z-10 flex items-center justify-center">
+                      <Image
+                        src={gridSlides[currentGrid].image}
+                        alt="Product"
+                        fill
+                        priority
+                        className="object-contain p-4 md:p-6 scale-110"
+                      />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
-              <div className="absolute right-[-10%] bottom-[-10%] w-[50%] h-[120%] group-hover:scale-110 transition-transform duration-500">
-                <Image
-                  src="/images/products/iphone-15.png"
-                  alt="iPhone 15"
-                  fill
-                  className="object-contain drop-shadow-xl"
-                />
+
+              {/* 2 Banner nhỏ bên phải */}
+              <div className="lg:col-span-4 flex flex-col gap-4 md:gap-5">
+                <div className="flex-1 rounded-2xl md:rounded-[1.5rem] bg-black border border-white/5 relative overflow-hidden group min-h-[150px] md:min-h-[180px]">
+                  <Image
+                    src="/images/products/sony-wh1000xm5.png"
+                    alt="Sony"
+                    fill
+                    className="object-contain p-4 md:p-6 group-hover:scale-110 transition-transform"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-4 md:p-6 flex flex-col justify-end">
+                    <p className="text-white font-black text-sm md:text-lg">
+                      SONY WH-1000XM5
+                    </p>
+                    <p className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-widest">
+                      Flash Sale 20%
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-1 rounded-2xl md:rounded-[1.5rem] bg-black border border-white/5 relative overflow-hidden group min-h-[150px] md:min-h-[180px]">
+                  <Image
+                    src="/images/products/iphone-15.png"
+                    alt="iPhone"
+                    fill
+                    className="object-contain p-4 md:p-6 group-hover:scale-110 transition-transform"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-4 md:p-6 flex flex-col justify-end">
+                    <p className="text-white font-black text-sm md:text-lg">
+                      IPHONE 15 PRO
+                    </p>
+                    <p className="text-[#C9A63F] text-[10px] font-bold uppercase tracking-widest">
+                      Trả góp 0%
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* THANH TIỆN ÍCH DƯỚI BANNER (Giống FPT/TGDD) */}
-        <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-white/5">
-          <div className="flex items-center gap-3 text-gray-400 justify-center">
-            <ShieldCheck className="text-[#C9A63F]" size={24} />
-            <div className="text-sm">
-              <p className="text-white font-bold">100% Chính hãng</p>
-              <p className="text-xs font-light">Bảo hành uy tín</p>
+        {/* TIỆN ÍCH DƯỚI CÙNG */}
+        <div className="grid grid-cols-3 gap-2 md:gap-4 mt-12 pt-10 border-t border-white/5">
+          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left justify-center">
+            <ShieldCheck className="text-[#C9A63F]" size={32} />
+            <div>
+              <p className="text-white font-bold text-xs md:text-base">
+                100% Chính hãng
+              </p>
+              <p className="text-gray-500 text-[10px] md:text-xs hidden sm:block">
+                An tâm mua sắm
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-gray-400 justify-center border-l border-white/5">
-            <Zap className="text-[#C9A63F]" size={24} />
-            <div className="text-sm">
-              <p className="text-white font-bold">Giao hàng 2H</p>
-              <p className="text-xs font-light">Miễn phí nội thành</p>
+          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left justify-center border-x border-white/5">
+            <Zap className="text-[#C9A63F]" size={32} />
+            <div>
+              <p className="text-white font-bold text-xs md:text-base">
+                Giao hàng 2H
+              </p>
+              <p className="text-gray-500 text-[10px] md:text-xs hidden sm:block">
+                Miễn phí nội thành
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-gray-400 justify-center border-l border-white/5">
-            <CreditCard className="text-[#C9A63F]" size={24} />
-            <div className="text-sm">
-              <p className="text-white font-bold">Trả góp 0%</p>
-              <p className="text-xs font-light">Qua thẻ tín dụng</p>
+          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left justify-center">
+            <CreditCard className="text-[#C9A63F]" size={32} />
+            <div>
+              <p className="text-white font-bold text-xs md:text-base">
+                Trả góp 0%
+              </p>
+              <p className="text-gray-500 text-[10px] md:text-xs hidden sm:block">
+                Duyệt nhanh 5 phút
+              </p>
             </div>
           </div>
         </div>
