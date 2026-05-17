@@ -1,9 +1,9 @@
 // src/store/authStore.ts
 import { create } from "zustand";
-import { auth, db } from "@/lib/firebase"; // Đảm bảo lib/firebase.ts đã export db = getFirestore()
+import { auth, db } from "@/lib/firebase";
 import {
   doc,
-  updateDoc,
+  setDoc,
   arrayUnion,
   arrayRemove,
   getDoc,
@@ -12,9 +12,8 @@ import {
 interface AuthState {
   user: any | null;
   isLoading: boolean;
-  wishlist: string[]; // Danh sách ID sản phẩm yêu thích
+  wishlist: string[];
   setUser: (user: any | null) => void;
-  // Hàm thả tim/bỏ tim
   toggleWishlist: (productId: string) => Promise<void>;
   fetchWishlist: (uid: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -28,31 +27,41 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setUser: (user) => set({ user }),
 
   fetchWishlist: async (uid) => {
-    const docRef = doc(db, "users", uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      set({ wishlist: docSnap.data().wishlist || [] });
+    try {
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        set({ wishlist: docSnap.data().wishlist || [] });
+      } else {
+        set({ wishlist: [] });
+      }
+    } catch (error) {
+      console.error("Lỗi lấy wishlist:", error);
+      set({ wishlist: [] });
     }
   },
 
   toggleWishlist: async (productId) => {
     const { user, wishlist } = get();
-    if (!user) {
-      alert("Vui lòng đăng nhập để lưu sản phẩm yêu thích!");
-      return;
-    }
+    if (!user) return;
 
     const isFavorite = wishlist.includes(productId);
     const userRef = doc(db, "users", user.uid);
 
     try {
       if (isFavorite) {
-        // Bỏ tim
-        await updateDoc(userRef, { wishlist: arrayRemove(productId) });
+        await setDoc(
+          userRef,
+          { wishlist: arrayRemove(productId) },
+          { merge: true },
+        );
         set({ wishlist: wishlist.filter((id) => id !== productId) });
       } else {
-        // Thêm tim
-        await updateDoc(userRef, { wishlist: arrayUnion(productId) });
+        await setDoc(
+          userRef,
+          { wishlist: arrayUnion(productId) },
+          { merge: true },
+        );
         set({ wishlist: [...wishlist, productId] });
       }
     } catch (error) {
@@ -61,7 +70,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    await auth.signOut();
-    set({ user: null, wishlist: [], isLoading: false });
+    try {
+      await auth.signOut();
+      set({ user: null, wishlist: [], isLoading: false });
+    } catch (error) {
+      console.error("Lỗi đăng xuất:", error);
+    }
   },
 }));

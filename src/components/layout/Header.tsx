@@ -1,3 +1,4 @@
+// src/components/layout/Header.tsx
 "use client";
 
 import Link from "next/link";
@@ -5,6 +6,7 @@ import { ShoppingCart, Search, User, X, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore"; // 1. Import thêm authStore để kiểm tra phiên đăng nhập
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -15,6 +17,7 @@ export default function Header() {
 
   const router = useRouter();
   const { items } = useCartStore();
+  const { user } = useAuthStore(); // 2. Lấy thông tin user hiện tại từ Zustand Store
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
@@ -62,9 +65,8 @@ export default function Header() {
       }`}
     >
       <div className="container mx-auto flex h-24 items-center justify-between px-6 md:px-10 text-white transition-all duration-500">
-        {/* LOGO VOLTHOME - PHƯƠNG ÁN B (VECTOR SVG) */}
+        {/* LOGO VOLTHOME */}
         <Link href="/" className="flex items-center z-50 group gap-3">
-          {/* Biểu tượng Logo B */}
           <svg
             width="38"
             height="38"
@@ -73,14 +75,12 @@ export default function Header() {
             xmlns="http://www.w3.org/2000/svg"
             className="transform group-hover:scale-105 transition-all duration-500 group-hover:drop-shadow-[0_0_15px_rgba(201,166,63,0.4)]"
           >
-            {/* Hình ngôi nhà (Màu Bạc/Trắng) */}
             <path
               d="M10 32 V18 L20 10 L30 18 V32 H10 Z"
               stroke="#E5E7EB"
               strokeWidth="2.5"
               strokeLinejoin="round"
             />
-            {/* Cửa/Lỗ hổng cho mũi tên xuyên qua */}
             <path
               d="M16 32 V22 H24 V32"
               fill="#050505"
@@ -88,7 +88,6 @@ export default function Header() {
               strokeWidth="2.5"
               strokeLinejoin="round"
             />
-            {/* Mũi tên năng lượng (Màu Vàng Gold) */}
             <path
               d="M20 28 V4 M12 12 L20 4 L28 12"
               stroke="#C9A63F"
@@ -98,7 +97,6 @@ export default function Header() {
             />
           </svg>
 
-          {/* Chữ Logo */}
           <div className="flex flex-col">
             <span className="text-xl md:text-2xl font-black tracking-[0.15em] text-white">
               VOLT<span className="text-[#C9A63F]">HOME</span>
@@ -165,13 +163,14 @@ export default function Header() {
             onClick={() => setIsSearchOpen(!isSearchOpen)}
           />
 
+          {/* ĐÃ SỬA: Tự động chuyển hướng /account nếu đã có user, giữ tông màu vàng Luxury khi đăng nhập */}
           <Link
-            href="/login"
+            href={user ? "/account" : "/login"}
             className="hidden md:block hover:scale-110 transition-transform duration-300"
           >
             <User
               strokeWidth={1.5}
-              className="h-5 w-5 cursor-pointer hover:text-[#C9A63F] transition-colors"
+              className={`h-5 w-5 cursor-pointer transition-colors ${user ? "text-[#C9A63F] hover:text-white" : "hover:text-[#C9A63F]"}`}
             />
           </Link>
 
@@ -249,13 +248,20 @@ export default function Header() {
 
         <div className="mt-auto pb-12 flex flex-col gap-6">
           <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+          {/* ĐÃ SỬA: Đồng bộ link mobile hướng về đúng trang tùy thuộc trạng thái đăng nhập */}
           <Link
-            href="/login"
+            href={user ? "/account" : "/login"}
             onClick={() => setIsMobileMenuOpen(false)}
             className="flex items-center justify-between text-gray-400 hover:text-[#C9A63F] transition-colors uppercase text-xs font-bold tracking-[0.2em]"
           >
             <span className="flex items-center gap-4">
-              <User size={20} strokeWidth={1.5} /> Tài khoản VIP
+              <User
+                size={20}
+                strokeWidth={1.5}
+                className={user ? "text-[#C9A63F]" : ""}
+              />
+              {user ? "Trang cá nhân VIP" : "Tài khoản VIP"}
             </span>
             <span className="text-lg">&rarr;</span>
           </Link>

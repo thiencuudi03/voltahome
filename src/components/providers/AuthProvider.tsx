@@ -14,17 +14,19 @@ export default function AuthProvider({
   const { setUser, fetchWishlist } = useAuthStore();
 
   useEffect(() => {
+    // Mỗi khi F5 hoặc đổi route, bật trạng thái Loading kiểm tra an toàn
+    useAuthStore.setState({ isLoading: true });
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Nếu ĐÃ ĐĂNG NHẬP -> Kéo wishlist về rồi mới tắt loading
         setUser(firebaseUser);
         await fetchWishlist(firebaseUser.uid);
-        useAuthStore.setState({ isLoading: false });
       } else {
-        // Nếu CHƯA ĐĂNG NHẬP -> Tắt ngay loading để trang chủ, trang sản phẩm hiện ra bình thường!
         setUser(null);
-        useAuthStore.setState({ isLoading: false, wishlist: [] });
+        useAuthStore.setState({ wishlist: [] });
       }
+      // QUAN TRỌNG: Chỉ tắt Loading sau khi đã nạp đủ dữ liệu User và Wishlist vào Store
+      useAuthStore.setState({ isLoading: false });
     });
 
     return () => unsubscribe();

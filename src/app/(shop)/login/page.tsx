@@ -33,8 +33,6 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       if (result?.user) {
-        // [THÊM MỚI] Ghi nhận user từ Google vào Firestore
-        // Dùng merge: true để nếu tài khoản này đã có wishlist rồi thì không bị ghi đè mất
         await setDoc(
           doc(db, "users", result.user.uid),
           {
@@ -77,7 +75,6 @@ export default function LoginPage() {
           await updateProfile(userCredential.user, { displayName: name });
         }
 
-        // [THÊM MỚI] Khởi tạo Document trên Firestore kèm wishlist rỗng cho tài khoản đăng ký mới
         await setDoc(doc(db, "users", userCredential.user.uid), {
           email: email,
           name: name || "",
@@ -108,7 +105,7 @@ export default function LoginPage() {
     return (
       <main className="min-h-screen bg-[#050505] flex flex-col items-center justify-center">
         <div className="w-10 h-10 border-4 border-white/10 border-t-[#C9A63F] rounded-full animate-spin mb-4"></div>
-        <p className="text-gray-500 text-xs font-bold uppercase tracking-widest tracking-[0.15em]">
+        <p className="text-gray-500 text-xs font-bold uppercase tracking-[0.15em]">
           Đang xác thực hệ thống...
         </p>
       </main>
@@ -122,6 +119,7 @@ export default function LoginPage() {
         <div className="flex gap-8 border-b border-white/10 mb-10 pb-4">
           <button
             type="button"
+            suppressHydrationWarning
             onClick={() => {
               setIsLogin(true);
               setErrorMsg("");
@@ -132,6 +130,7 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
+            suppressHydrationWarning
             onClick={() => {
               setIsLogin(false);
               setErrorMsg("");
@@ -163,6 +162,7 @@ export default function LoginPage() {
                 <input
                   required
                   type="text"
+                  suppressHydrationWarning
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Nguyễn Văn A"
@@ -171,6 +171,7 @@ export default function LoginPage() {
               </div>
             </div>
           )}
+
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-4">
               Email
@@ -183,6 +184,7 @@ export default function LoginPage() {
               <input
                 required
                 type="email"
+                suppressHydrationWarning
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="vip@gmail.com"
@@ -190,6 +192,7 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
           <div className="space-y-2">
             <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-4">
               Mật khẩu
@@ -202,6 +205,7 @@ export default function LoginPage() {
               <input
                 required
                 type="password"
+                suppressHydrationWarning
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••"
@@ -209,8 +213,10 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
           <button
             type="submit"
+            suppressHydrationWarning
             className="w-full flex items-center justify-center gap-3 bg-[#C9A63F] text-black py-5 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:bg-white transition-all duration-500 mt-8 group"
           >
             {isLogin ? "Vào tài khoản" : "Tạo tài khoản VIP"}
@@ -228,6 +234,7 @@ export default function LoginPage() {
           <div className="flex gap-4 justify-center">
             <button
               type="button"
+              suppressHydrationWarning
               onClick={handleGoogleLogin}
               className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-[#C9A63F]/50 transition-all text-gray-300 hover:text-white"
             >

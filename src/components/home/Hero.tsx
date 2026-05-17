@@ -1,3 +1,4 @@
+// src/components/home/Hero.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -58,7 +59,6 @@ export default function Hero() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col gap-6 md:gap-8">
           {/* --- BANNER LỚN TRÊN CÙNG: ÉP TỈ LỆ DẸT CỰC ĐẠI --- */}
-          {/* lg:aspect-[6/1] giúp banner cực dài và mỏng giống FPT Shop */}
           <div className="w-full relative rounded-2xl md:rounded-3xl overflow-hidden aspect-[2.2/1] sm:aspect-[3/1] md:aspect-[4/1] lg:aspect-[6/1] group shadow-2xl border border-white/5 bg-[#111]">
             <AnimatePresence mode="wait">
               <motion.div
@@ -78,28 +78,33 @@ export default function Hero() {
                     alt="VoltHome Main Promo"
                     fill
                     priority
-                    className="object-cover" // Giữ tỉ lệ ảnh gốc, không bị bóp méo
+                    className="object-cover"
                   />
                 </Link>
               </motion.div>
             </AnimatePresence>
 
+            {/* Bổ sung suppressHydrationWarning chống Edge tự điền thuộc tính lạ */}
             <button
               onClick={() =>
                 setCurrentTop((prev) =>
                   prev === 0 ? topBanners.length - 1 : prev - 1,
                 )
               }
+              suppressHydrationWarning
               className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-sm"
             >
               <ChevronLeft size={24} />
             </button>
+
+            {/* Bổ sung suppressHydrationWarning chống Edge tự điền thuộc tính lạ */}
             <button
               onClick={() =>
                 setCurrentTop((prev) =>
                   prev === topBanners.length - 1 ? 0 : prev + 1,
                 )
               }
+              suppressHydrationWarning
               className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 backdrop-blur-sm"
             >
               <ChevronRight size={24} />

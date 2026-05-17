@@ -17,6 +17,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore"; // Import authStore để giữ nhịp session toàn cục
 import { toast } from "sonner";
 
 // --- IMPORT FIREBASE ---
@@ -24,12 +25,13 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from "@/types/product";
 
-// 1. IMPORT NÚT YÊU THÍCH
+// ĐÃ SỬA: Đường dẫn import chính xác của component FavoriteButton
 import FavoriteButton from "@/components/product/FavoriteButton";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const addItem = useCartStore((state) => state.addItem);
+  const { isLoading: isAuthLoading } = useAuthStore(); // Lấy trạng thái loading auth để đồng bộ nhịp chuyển route
   const detailRef = useRef<HTMLDivElement>(null);
 
   const [quantity, setQuantity] = useState(1);
@@ -64,7 +66,8 @@ export default function ProductDetailPage() {
     fetchProductDetail();
   }, [params.id]);
 
-  if (isLoading) {
+  // Chờ cả dữ liệu sản phẩm và dữ liệu xác thực tải xong, tránh đứt gãy session
+  if (isLoading || isAuthLoading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-white/10 border-t-[#C9A63F] rounded-full animate-spin"></div>
@@ -72,7 +75,13 @@ export default function ProductDetailPage() {
     );
   }
 
-  if (!product) return null;
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-gray-400">
+        Sản phẩm không tồn tại hoặc đã bị gỡ bỏ.
+      </div>
+    );
+  }
 
   const galleryImages =
     product.images && product.images.length > 0
@@ -84,7 +93,6 @@ export default function ProductDetailPage() {
     if (!product.descriptionData || product.descriptionData.length === 0)
       return null;
 
-    // Chỉ hiển thị 2 mục đầu tiên nếu chưa bấm "Xem thêm"
     const displayData = isExpanded
       ? product.descriptionData
       : product.descriptionData.slice(0, 2);
@@ -129,13 +137,11 @@ export default function ProductDetailPage() {
             </div>
           ))}
 
-          {/* Hiệu ứng mờ dần khi chưa mở rộng */}
           {!isExpanded && product.descriptionData.length > 2 && (
             <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent pointer-events-none" />
           )}
         </div>
 
-        {/* Nút Xem thêm / Thu gọn cho các mục 3, 4... */}
         {product.descriptionData.length > 2 && (
           <div className="flex justify-center mt-16">
             <button
@@ -186,7 +192,6 @@ export default function ProductDetailPage() {
                 />
               </div>
 
-              {/* SỐ THỨ TỰ ẢNH */}
               <div className="absolute bottom-6 left-6 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold tracking-widest text-[#C9A63F] z-10">
                 {currentIndex + 1} / {galleryImages.length}
               </div>
@@ -263,7 +268,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* GIÁ CẢ (SỐ GIÁ) */}
+            {/* GIÁ CẢ */}
             <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl p-8 flex items-end gap-4 shadow-2xl">
               <span className="text-5xl font-black text-[#C9A63F] tracking-tighter">
                 {new Intl.NumberFormat("vi-VN", {
@@ -304,7 +309,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* SỐ LƯỢNG & NÚT TƯƠNG TÁC (Đã bổ sung nút Yêu Thích) */}
+            {/* SỐ LƯỢNG & NÚT TƯƠNG TÁC */}
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 pt-4">
               <div className="flex items-center bg-[#0A0A0A] border border-white/10 rounded-full px-2">
                 <button
@@ -336,7 +341,7 @@ export default function ProductDetailPage() {
                 <ShoppingCart size={18} /> Thêm vào giỏ hàng
               </button>
 
-              {/* 2. CHÈN COMPONENT NÚT YÊU THÍCH VÀO ĐÂY */}
+              {/* Nút Yêu Thích */}
               <div className="flex items-center justify-center scale-125 ml-2">
                 <FavoriteButton productId={product.id.toString()} />
               </div>
