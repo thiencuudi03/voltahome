@@ -1,25 +1,10 @@
-// src/app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "@/app/globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import { Toaster } from "sonner";
+import "./globals.css";
 import AuthInitializer from "@/components/providers/AuthInitializer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "VoltHome — Tuyệt Tác Công Nghệ Tối Giản",
-  description: "Nền tảng mua sắm thiết bị công nghệ cao cấp",
+  title: "VoltHome - Luxury Electronics",
+  description: "Luxury Electronics E-commerce",
 };
 
 export default function RootLayout({
@@ -28,15 +13,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#050505] text-white min-h-screen flex flex-col justify-between`}
-      >
+    <html lang="vi">
+      <body className="antialiased bg-black text-white">
+        {/* Giữ nguyên lớp bọc Firebase Auth */}
         <AuthInitializer>
-          <Header />
-          <div className="flex-grow">{children}</div>
-          <Footer />
-          <Toaster richColors closeButton />
+          {children}{" "}
+          {/* Trả lại không gian độc lập, không ép Header/Footer lên toàn hệ thống nữa */}
         </AuthInitializer>
       </body>
     </html>
