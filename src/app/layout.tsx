@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AuthInitializer from "@/components/providers/AuthInitializer";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "VoltHome - Luxury Electronics",
@@ -15,10 +16,11 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className="antialiased bg-black text-white">
-        {/* Giữ nguyên lớp bọc Firebase Auth */}
+        {/* AuthInitializer sẽ duy trì trạng thái đăng nhập cho toàn bộ trang web */}
         <AuthInitializer>
-          {children}{" "}
-          {/* Trả lại không gian độc lập, không ép Header/Footer lên toàn hệ thống nữa */}
+          {/* Toaster đặt ở đây để thông báo hiển thị trên toàn hệ thống (cả Shop và Admin) */}
+          <Toaster theme="dark" position="top-right" />
+          {children}
         </AuthInitializer>
       </body>
     </html>

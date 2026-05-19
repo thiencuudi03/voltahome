@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AboutSection() {
   return (
@@ -69,9 +70,12 @@ export default function AboutSection() {
             </div>
 
             <div>
-              <button className="group relative px-10 py-4 bg-[#C9A63F] text-black font-black text-xs uppercase tracking-[0.3em] transition-all hover:bg-white active:scale-95">
+              <Link
+                href="/about"
+                className="group relative px-10 py-4 bg-[#C9A63F] text-black font-black text-xs uppercase tracking-[0.3em] transition-all hover:bg-white active:scale-95"
+              >
                 Xem toàn bộ cam kết
-              </button>
+              </Link>
             </div>
           </div>
         </div>

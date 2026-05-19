@@ -1,47 +1,50 @@
-// src/store/authStore.ts
 import { create } from "zustand";
-import { auth, db } from "@/lib/firebase";
 import {
   doc,
-  setDoc,
+  getDoc,
+  updateDoc,
   arrayUnion,
   arrayRemove,
-  getDoc,
 } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 
 interface AuthState {
-  user: any | null;
-  isLoading: boolean;
+  user: any;
   wishlist: string[];
-  setUser: (user: any | null) => void;
-  toggleWishlist: (productId: string) => Promise<void>;
+  isLoading: boolean;
+  setWishlist: (wishlist: string[]) => void;
+  setUser: (user: any) => void;
   fetchWishlist: (uid: string) => Promise<void>;
+  toggleWishlist: (productId: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  isLoading: true,
   wishlist: [],
+  isLoading: true,
 
-  setUser: (user) => set({ user }),
+  setWishlist: (wishlist: string[]) => set({ wishlist }),
+  setUser: (user: any) => set({ user, isLoading: false }),
 
-  fetchWishlist: async (uid) => {
+  fetchWishlist: async (uid: string) => {
     try {
-      const docRef = doc(db, "users", uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        set({ wishlist: docSnap.data().wishlist || [] });
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        set({ wishlist: data.wishlist || [] });
       } else {
         set({ wishlist: [] });
       }
     } catch (error) {
-      console.error("Lỗi lấy wishlist:", error);
+      console.error("Lỗi khi fetch wishlist từ Firestore:", error);
       set({ wishlist: [] });
     }
   },
 
-  toggleWishlist: async (productId) => {
+  toggleWishlist: async (productId: string) => {
+    if (!productId) return;
     const { user, wishlist } = get();
     if (!user) return;
 
@@ -50,19 +53,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       if (isFavorite) {
-        await setDoc(
-          userRef,
-          { wishlist: arrayRemove(productId) },
-          { merge: true },
-        );
-        set({ wishlist: wishlist.filter((id) => id !== productId) });
+        await updateDoc(userRef, { wishlist: arrayRemove(productId) });
+        set((state) => ({
+          wishlist: state.wishlist.filter((id: string) => id !== productId),
+        }));
       } else {
-        await setDoc(
-          userRef,
-          { wishlist: arrayUnion(productId) },
-          { merge: true },
-        );
-        set({ wishlist: [...wishlist, productId] });
+        await updateDoc(userRef, { wishlist: arrayUnion(productId) });
+        set((state) => ({
+          wishlist: [...state.wishlist, productId],
+        }));
       }
     } catch (error) {
       console.error("Lỗi cập nhật wishlist:", error);
