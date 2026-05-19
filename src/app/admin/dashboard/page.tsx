@@ -72,6 +72,8 @@ export default function AdminDashboard() {
     icon: "📁",
   });
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // Thêm dòng này
+
   // ==========================================
   // XỬ LÝ PHÂN QUYỀN ADMIN TỐI CAO
   // ==========================================
@@ -119,13 +121,16 @@ export default function AdminDashboard() {
     }
   }, [isAdminVerified, currentTab, productSubTab]);
 
-  const handleAdminLogout = async () => {
-    if (confirm("Bạn có chắc chắn muốn rời khỏi phiên bản quản trị?")) {
-      await signOut(auth);
-      router.push("/login");
-    }
+  // Hàm xử lý chỉ mở modal, chưa thoát ngay
+  const handleAdminLogout = () => {
+    setShowLogoutModal(true);
   };
 
+  // Hàm thoát thật sự (sau khi nhấn OK trong modal)
+  const confirmLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
   // ==========================================
   // XỬ LÝ SỬA & XÓA SẢN PHẨM
   // ==========================================
@@ -298,6 +303,7 @@ export default function AdminDashboard() {
               Management Console
             </p>
           </div>
+
           <nav className="space-y-1.5">
             {[
               { id: "overview", label: "Tổng quan Dashboard", icon: "📊" },
@@ -315,6 +321,18 @@ export default function AdminDashboard() {
                 <span>{tab.label}</span>
               </button>
             ))}
+
+            {/* 🌟 NÚT QUAY VỀ TRANG CHỦ MỚI THÊM VÀO ĐÂY */}
+            <div className="pt-6 mt-6 border-t border-zinc-800">
+              <a
+                href="/"
+                target="_blank"
+                className="w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-500/10 transition-all duration-300"
+              >
+                <span>🏠</span>
+                <span>Về trang chủ Shop</span>
+              </a>
+            </div>
           </nav>
         </div>
 
@@ -1019,6 +1037,37 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+        {/* MODAL XÁC NHẬN ĐĂNG XUẤT */}
+        {showLogoutModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full mx-4 text-center">
+              <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="text-rose-500" size={32} />
+              </div>
+              <h3 className="text-xl font-black text-white uppercase tracking-widest mb-2">
+                Đăng xuất?
+              </h3>
+              <p className="text-zinc-400 text-sm mb-8">
+                Bạn có chắc chắn muốn rời khỏi phiên quản trị hệ thống không?
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold text-sm transition-all"
+                >
+                  Tiếp tục
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold text-sm transition-all shadow-[0_0_15px_rgba(225,29,72,0.3)]"
+                >
+                  Xác nhận thoát
+                </button>
+              </div>
             </div>
           </div>
         )}

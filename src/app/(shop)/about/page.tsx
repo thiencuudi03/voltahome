@@ -36,7 +36,7 @@ export default function AboutPage() {
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center mb-48">
           <div className="lg:col-span-7 relative aspect-[16/9] rounded-[3rem] overflow-hidden border border-white/5 group">
             <Image
-              src="https://images.unsplash.com/photo-1510511459019-5dee99c43dbf?q=80&w=2070"
+              src="/images/products/ab-m1.jpg"
               alt="VoltHome Vision"
               fill
               className="object-cover transition-transform duration-1000 group-hover:scale-110 grayscale hover:grayscale-0"

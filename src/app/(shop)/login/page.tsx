@@ -171,6 +171,7 @@ export default function LoginPage() {
                 />
                 <input
                   required
+                  suppressHydrationWarning={true}
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -192,6 +193,7 @@ export default function LoginPage() {
               />
               <input
                 required
+                suppressHydrationWarning={true}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -212,6 +214,7 @@ export default function LoginPage() {
               />
               <input
                 required
+                suppressHydrationWarning={true}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
