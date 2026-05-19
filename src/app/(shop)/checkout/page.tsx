@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
+// Import tác vụ chốt đơn thật từ tầng service của chúng ta
+import { createFirebaseOrder } from "@/services/productService";
 import { toast } from "sonner";
 import {
   ChevronLeft,
@@ -19,12 +21,24 @@ export default function CheckoutPage() {
   const { items, clearCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("cod"); // 'cod' hoặc 'card'
 
+  // 🌟 BỔ SUNG STATE QUẢN LÝ THÔNG TIN KHÁCH HÀNG THỰC TẾ
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    note: "",
+  });
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // --- ĐÃ SỬA LỖI Ở ĐÂY ---
-  // Chuyển logic đẩy trang (router.replace) vào bên trong useEffect
   useEffect(() => {
     if (isMounted && items.length === 0) {
       router.replace("/products");
@@ -33,11 +47,9 @@ export default function CheckoutPage() {
 
   if (!isMounted) return null;
 
-  // Nếu giỏ hàng trống, return null để chờ useEffect bên trên đẩy về trang products
   if (items.length === 0) {
     return null;
   }
-  // -------------------------
 
   const subtotal = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -51,23 +63,51 @@ export default function CheckoutPage() {
     }).format(price);
   };
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  // ============================================================================
+  // LỘI LOGIC GỬI ĐƠN HÀNG THẬT LÊN CLOUD FIRESTORE
+  // ============================================================================
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    toast.loading("Đang xử lý đơn hàng...", {
-      description: "Hệ thống đang mã hóa thông tin của bạn.",
+    // Khởi tạo Toast Loading cao cấp từ thư viện Sonner
+    const toastId = toast.loading("Đang xử lý đơn hàng...", {
+      description: "Hệ thống đang mã hóa và gửi thông tin chốt đơn của bạn.",
     });
 
-    // Giả lập call API xử lý thanh toán mất 2 giây
-    setTimeout(() => {
-      toast.dismiss();
+    // Đóng gói payload đúng cấu hình phân hệ Admin Dashboard cần khai thác
+    const orderPayload = {
+      name: formData.name,
+      phone: formData.phone,
+      address: formData.address,
+      note: formData.note,
+      items: items,
+      totalAmount: subtotal,
+      paymentMethod: paymentMethod,
+    };
+
+    // Gọi API Client gửi thẳng lên mây Firebase qua trình duyệt Chrome
+    const result = await createFirebaseOrder(orderPayload);
+
+    if (result.success) {
+      // 1. Tắt loading và bắn thông báo thành công bừng sáng
+      toast.dismiss(toastId);
       toast.success("ĐẶT HÀNG THÀNH CÔNG!", {
-        description:
-          "Mã đơn hàng của bạn đã được gửi qua Email. Cảm ơn quý khách!",
+        description: `Mã đơn hàng [${result.id?.slice(0, 8)}] đã được đồng bộ lên hệ thống VoltHome.`,
       });
+
+      // 2. Clear sạch giỏ hàng Store để tránh đặt trùng lặp
       clearCart();
-      router.push("/"); // Trở về trang chủ
-    }, 2000);
+
+      // 3. Đẩy khách quay về trang chủ mua sắm mượt mà
+      router.push("/");
+    } else {
+      // Báo lỗi nếu đường truyền Firebase rớt mạng hoặc lỗi cấu hình SDK
+      toast.dismiss(toastId);
+      toast.error("GIAO DỊCH THẤT BẠI", {
+        description:
+          "Hệ thống kết nối Firestore bị gián đoạn, vui lòng kiểm tra lại.",
+      });
+    }
   };
 
   return (
@@ -105,6 +145,9 @@ export default function CheckoutPage() {
                   <input
                     required
                     type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                     placeholder="Nhập họ tên của bạn"
                     className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F] transition-colors"
                   />
@@ -116,6 +159,9 @@ export default function CheckoutPage() {
                   <input
                     required
                     type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
                     placeholder="Nhập số điện thoại"
                     className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F] transition-colors"
                   />
@@ -127,6 +173,9 @@ export default function CheckoutPage() {
                   <input
                     required
                     type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
                     placeholder="Số nhà, tên đường, phường/xã, quận/huyện, thành phố"
                     className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F] transition-colors"
                   />
@@ -137,6 +186,9 @@ export default function CheckoutPage() {
                   </label>
                   <textarea
                     rows={3}
+                    name="note"
+                    value={formData.note}
+                    onChange={handleInputChange}
                     placeholder="Ghi chú thêm về đơn hàng..."
                     className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F] transition-colors resize-none"
                   />
@@ -225,7 +277,7 @@ export default function CheckoutPage() {
                 Đơn hàng của bạn
               </h2>
 
-              {/* Danh sách món */}
+              {/* Danh sách món lấy động từ Zustand store */}
               <div className="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {items.map((item) => (
                   <div
@@ -277,7 +329,7 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-              {/* Submit Form Button */}
+              {/* Nút bấm chốt đơn */}
               <button
                 type="submit"
                 className="w-full flex items-center justify-center gap-3 bg-[#C9A63F] text-black py-5 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:bg-white transition-all duration-300"

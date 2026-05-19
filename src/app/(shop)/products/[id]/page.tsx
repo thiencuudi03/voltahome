@@ -17,7 +17,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { useAuthStore } from "@/store/authStore"; // Import authStore để giữ nhịp session toàn cục
+import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 
 // --- IMPORT FIREBASE ---
@@ -25,13 +25,13 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from "@/types/product";
 
-// ĐÃ SỬA: Đường dẫn import chính xác của component FavoriteButton
+// Component FavoriteButton đã được cập nhật logic
 import FavoriteButton from "@/components/product/FavoriteButton";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const addItem = useCartStore((state) => state.addItem);
-  const { isLoading: isAuthLoading } = useAuthStore(); // Lấy trạng thái loading auth để đồng bộ nhịp chuyển route
+  const { isLoading: isAuthLoading } = useAuthStore();
   const detailRef = useRef<HTMLDivElement>(null);
 
   const [quantity, setQuantity] = useState(1);
@@ -343,7 +343,8 @@ export default function ProductDetailPage() {
 
               {/* Nút Yêu Thích */}
               <div className="flex items-center justify-center scale-125 ml-2">
-                <FavoriteButton productId={product.id.toString()} />
+                {/* ĐÃ SỬA: Chuyền nguyên cục product vào đây */}
+                <FavoriteButton product={product} />
               </div>
             </div>
           </div>

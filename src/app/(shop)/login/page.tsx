@@ -1,4 +1,3 @@
-// src/app/(shop)/login/page.tsx
 "use client";
 
 import { doc, setDoc } from "firebase/firestore";
@@ -18,11 +17,22 @@ import {
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Email quy định đặc quyền Admin
+  const ADMIN_EMAIL = "thiencuudi@gmail.com";
+
+  // Hàm điều hướng thông minh
+  const handleRedirect = (email: string | null) => {
+    if (email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+      window.location.href = "/admin/dashboard";
+    } else {
+      window.location.href = "/account";
+    }
+  };
 
   const handleGoogleLogin = async () => {
     setErrorMsg("");
@@ -43,7 +53,7 @@ export default function LoginPage() {
         );
 
         useAuthStore.setState({ user: result.user, isLoading: false });
-        window.location.href = "/account";
+        handleRedirect(result.user.email);
       }
     } catch (err: any) {
       setErrorMsg("Xác thực Google bị hủy hoặc thất bại.");
@@ -64,7 +74,7 @@ export default function LoginPage() {
           password,
         );
         useAuthStore.setState({ user: userCredential.user, isLoading: false });
-        window.location.href = "/account";
+        handleRedirect(userCredential.user.email);
       } else {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
@@ -83,7 +93,7 @@ export default function LoginPage() {
         });
 
         useAuthStore.setState({ user: userCredential.user, isLoading: false });
-        window.location.href = "/account";
+        handleRedirect(userCredential.user.email);
       }
     } catch (err: any) {
       setLoading(false);
@@ -162,7 +172,6 @@ export default function LoginPage() {
                 <input
                   required
                   type="text"
-                  suppressHydrationWarning
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Nguyễn Văn A"
@@ -184,7 +193,6 @@ export default function LoginPage() {
               <input
                 required
                 type="email"
-                suppressHydrationWarning
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="vip@gmail.com"
@@ -205,7 +213,6 @@ export default function LoginPage() {
               <input
                 required
                 type="password"
-                suppressHydrationWarning
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••"
@@ -216,7 +223,6 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            suppressHydrationWarning
             className="w-full flex items-center justify-center gap-3 bg-[#C9A63F] text-black py-5 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:bg-white transition-all duration-500 mt-8 group"
           >
             {isLogin ? "Vào tài khoản" : "Tạo tài khoản VIP"}
@@ -231,16 +237,13 @@ export default function LoginPage() {
           <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-6">
             Hoặc tiếp tục với
           </p>
-          <div className="flex gap-4 justify-center">
-            <button
-              type="button"
-              suppressHydrationWarning
-              onClick={handleGoogleLogin}
-              className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-[#C9A63F]/50 transition-all text-gray-300 hover:text-white"
-            >
-              <span className="font-bold text-xl">G</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-[#C9A63F]/50 transition-all text-gray-300 hover:text-white mx-auto"
+          >
+            <span className="font-bold text-xl">G</span>
+          </button>
         </div>
       </div>
     </main>

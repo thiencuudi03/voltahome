@@ -1,4 +1,3 @@
-// src/app/(shop)/account/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,9 +6,17 @@ import Link from "next/link";
 import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { User as UserIcon, Heart, Package, Trash2 } from "lucide-react";
+import {
+  User as UserIcon,
+  Heart,
+  Package,
+  Trash2,
+  ArrowRight,
+} from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { Product } from "@/types/product";
+// 🌟 Import hàm lọc đơn hàng theo email khách hàng từ Service trung tâm
+import { getFirebaseOrdersByEmail } from "@/services/productService";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -19,6 +26,10 @@ export default function AccountPage() {
 
   const [savedProducts, setSavedProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
+  // 🌟 BỔ SUNG STATE QUẢN LÝ ĐƠN HÀNG THỰC TẾ CỦA KHÁCH HÀNG
+  const [userOrders, setUserOrders] = useState<any[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
   // 1. Bảo mật chuyển hướng: Nếu hệ thống đã quét xong phiên (!isLoading) mà không có user -> đá về login
   useEffect(() => {
@@ -57,6 +68,26 @@ export default function AccountPage() {
 
     loadWishlistProducts();
   }, [wishlist]);
+
+  // 3. 🌟 TỰ ĐỘNG TẢI LỊCH SỬ ĐƠN HÀNG KHI USER ĐÃ ĐĂNG NHẬP THÀNH CÔNG
+  useEffect(() => {
+    const fetchOrdersData = async () => {
+      if (!user || !user.email) return;
+      setIsLoadingOrders(true);
+      try {
+        const orders = await getFirebaseOrdersByEmail(user.email);
+        setUserOrders(orders);
+      } catch (error) {
+        console.error("Lỗi khi tải lịch sử giao dịch:", error);
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    };
+
+    if (user) {
+      fetchOrdersData();
+    }
+  }, [user]);
 
   // ĐÃ SỬA: Chỉ xoay khi hệ thống toàn cục THỰC SỰ thông báo đang quét phiên đăng nhập
   if (isLoading) {
@@ -110,7 +141,9 @@ export default function AccountPage() {
 
         {/* KHU VỰC QUẢN LÝ TÁC VỤ CHÍNH */}
         <div className="grid md:grid-cols-2 gap-8 items-start">
-          {/* CỘT 1: ĐƠN HÀNG */}
+          {/* ====================================================================== */}
+          {/* CỘT 1: ĐƠN HÀNG (ĐÃ ĐỔ DATA THỰC TẾ ĐỒNG BỘ CLOUD) */}
+          {/* ====================================================================== */}
           <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl p-8 space-y-6 min-h-[300px] flex flex-col">
             <div className="flex items-center gap-3 text-[#C9A63F]">
               <Package size={20} />
@@ -118,10 +151,46 @@ export default function AccountPage() {
                 Đơn hàng gần đây
               </h2>
             </div>
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-gray-600 text-sm font-light italic">
-                Chưa có dữ liệu giao dịch.
-              </p>
+
+            <div className="flex-1 flex flex-col justify-start w-full">
+              {isLoadingOrders ? (
+                <div className="flex justify-center items-center flex-1 py-12">
+                  <div className="w-8 h-8 border-4 border-white/10 border-t-[#C9A63F] rounded-full animate-spin"></div>
+                </div>
+              ) : userOrders.length > 0 ? (
+                <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1 chunk-scrollbar w-full">
+                  {userOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="bg-white/5 border border-white/5 rounded-2xl p-5 flex justify-between items-center hover:border-zinc-700 transition-all duration-300"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-[9px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
+                          Mã: #{order.id.slice(0, 8)}
+                        </p>
+                        <p className="text-base font-black text-zinc-100 font-mono">
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(order.totalAmount)}
+                        </p>
+                        <p className="text-[10px] text-zinc-400 font-medium italic">
+                          Gồm {order.items?.length || 0} món đồ công nghệ
+                        </p>
+                      </div>
+                      <span className="text-[9px] font-black bg-zinc-950 px-2.5 py-1.5 rounded-lg border border-zinc-800 text-amber-400 uppercase tracking-wider shrink-0">
+                        {order.status || "Chờ xử lý"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center py-12">
+                  <p className="text-gray-600 text-sm font-light italic">
+                    Chưa có dữ liệu giao dịch.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -178,6 +247,7 @@ export default function AccountPage() {
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => toggleWishlist(product.id)}
                       className="p-2.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all duration-300 flex-shrink-0"
                       title="Xóa khỏi danh sách"

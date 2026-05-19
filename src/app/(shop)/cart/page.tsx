@@ -1,4 +1,3 @@
-// src/app/(shop)/cart/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -10,18 +9,16 @@ import {
   ArrowRight,
   ShoppingBag,
   ShieldCheck,
-  Heart,
 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { useAuthStore } from "@/store/authStore";
-import { toast } from "sonner"; // Thư viện hiển thị thông báo popup
+import { toast } from "sonner";
+
+// 🌟 THAY VÌ VIẾT LẠI LOGIC THẢ TIM BẰNG TAY, TỤI MÌNH DÙNG COMPONENT ĐÃ CODE SẴN
+import FavoriteButton from "@/components/product/FavoriteButton";
 
 export default function CartPage() {
   const [isMounted, setIsMounted] = useState(false);
   const { items, removeItem, updateQuantity } = useCartStore();
-
-  // Lấy dữ liệu wishlist và hàm thả tim từ Store bảo mật
-  const { wishlist, toggleWishlist, user } = useAuthStore();
 
   useEffect(() => {
     setIsMounted(true);
@@ -39,30 +36,6 @@ export default function CartPage() {
       style: "currency",
       currency: "VND",
     }).format(price);
-  };
-
-  // Hàm xử lý thả tim trực tiếp trên giỏ hàng
-  const handleFavoriteClick = async (
-    productId: string,
-    productName: string,
-  ) => {
-    if (!user) {
-      toast.error("Vui lòng đăng nhập để lưu sản phẩm yêu thích!", {
-        duration: 3000,
-      });
-      return;
-    }
-
-    await toggleWishlist(productId);
-    const isNowFavorite = !wishlist.includes(productId); // Đảo ngược logic hiện tại vì nó vừa toggle
-
-    if (isNowFavorite) {
-      toast.success(`Đã thêm ${productName} vào danh sách VIP!`, {
-        icon: <Heart size={14} fill="#ef4444" className="text-red-500" />,
-      });
-    } else {
-      toast.info(`Đã xóa khỏi danh sách yêu thích.`);
-    }
   };
 
   // Hàm tăng số lượng kèm thông báo
@@ -125,9 +98,6 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-8 space-y-6">
             {items.map((item) => {
-              // Kiểm tra xem sản phẩm này có đang nằm trong mảng wishlist không
-              const isFavorite = wishlist.includes(item.id);
-
               return (
                 <div
                   key={item.id}
@@ -164,20 +134,8 @@ export default function CartPage() {
                   <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end">
                     {/* KHỐI NÚT CHỨC NĂNG (TIM & XÓA) */}
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleFavoriteClick(item.id, item.name)}
-                        className={`p-2 sm:p-3 rounded-full border transition-all duration-300 ${
-                          isFavorite
-                            ? "bg-red-500/10 border-red-500/30 text-red-500"
-                            : "bg-white/5 border-white/10 text-gray-600 hover:text-white"
-                        }`}
-                        title="Thêm vào danh sách yêu thích"
-                      >
-                        <Heart
-                          size={18}
-                          fill={isFavorite ? "currentColor" : "none"}
-                        />
-                      </button>
+                      {/* 🌟 NÚT TIM AN TOÀN ĐƯỢC ĐỒNG BỘ DATA VỚI CLOUD */}
+                      <FavoriteButton product={item as any} />
 
                       <button
                         onClick={() => handleRemove(item.id)}

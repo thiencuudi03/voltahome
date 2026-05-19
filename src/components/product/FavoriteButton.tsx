@@ -1,52 +1,109 @@
-// src/components/products/FavoriteButton.tsx
 "use client";
 
+import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
+import {
+  addFirebaseWishlistItem,
+  getFirebaseWishlist,
+  deleteFirebaseWishlistItem,
+} from "@/services/productService";
+import { Product } from "@/types/product";
 
-export default function FavoriteButton({ productId }: { productId: string }) {
-  const { wishlist, toggleWishlist, user } = useAuthStore();
-  const isFavorite = wishlist.includes(productId);
+export default function FavoriteButton({ product }: { product: Product }) {
+  const { user } = useAuthStore();
 
-  const handleToggle = async (e: React.MouseEvent) => {
-    // Chặn sự kiện click bị "xuyên" xuống thẻ Link cha gây nhảy trang
-    e.preventDefault();
-    e.stopPropagation();
+  const [isSaved, setIsSaved] = useState(false);
+  const [wishlistDocId, setWishlistDocId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-    if (!user) {
-      toast.error("Từ chối truy cập!", {
-        description:
-          "Vui lòng đăng nhập tài khoản VIP để lưu sản phẩm yêu thích.",
-        duration: 3000,
-      });
+  // Khi tải trang, kiểm tra xem sản phẩm này đã nằm trong Wishlist của user chưa
+  // ...
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      // 🌟 THÊM product?.id VÀO ĐÂY ĐỂ CHỐNG CRASH KHI DỮ LIỆU BỊ TRỐNG
+      if (!user || !user.email || !product?.id) return;
+
+      try {
+        const list = await getFirebaseWishlist(user.email);
+        const foundItem = list.find((item) => item.productId === product.id);
+
+        if (foundItem) {
+          setIsSaved(true);
+          setWishlistDocId(foundItem.id);
+        }
+      } catch (error) {
+        console.error("Lỗi kiểm tra trạng thái yêu thích:", error);
+      }
+    };
+
+    checkFavoriteStatus();
+    // 🌟 THÊM DẤU CHẤM HỎI VÀO BẢNG DEPENDENCIES NÀY LUÔN NHEN
+  }, [user, product?.id]);
+  // ...
+
+  // Xử lý khi khách hàng bấm vào nút Trái tim
+  const handleToggleFavorite = async () => {
+    if (!user || !user.email) {
+      toast.error("Vui lòng đăng nhập để sử dụng tính năng lưu trữ!");
       return;
     }
 
-    await toggleWishlist(productId);
+    setIsLoading(true);
 
-    // Thông báo cho người dùng biết (dùng logic ngược lại vì trạng thái vừa bị toggle)
-    if (!isFavorite) {
-      toast.success("Đã thêm vào danh sách VIP!", {
-        icon: <Heart size={14} fill="#ef4444" className="text-red-500" />,
-      });
+    if (isSaved && wishlistDocId) {
+      // TRƯỜNG HỢP 1: Đã lưu rồi -> Bấm vào để XÓA (Bỏ thả tim)
+      const res = await deleteFirebaseWishlistItem(wishlistDocId);
+      if (res.success) {
+        setIsSaved(false);
+        setWishlistDocId(null);
+        toast.success("Đã gỡ thiết bị khỏi danh sách yêu thích.");
+      } else {
+        toast.error("Lỗi đường truyền, không thể gỡ bỏ lúc này.");
+      }
     } else {
-      toast.info("Đã xóa khỏi danh sách yêu thích.");
+      // TRƯỜNG HỢP 2: Chưa lưu -> Bấm vào để THÊM (Thả tim)
+      const res = await addFirebaseWishlistItem({
+        userEmail: user.email,
+        productId: product.id,
+        productName: product.name,
+        productPrice: product.price,
+        productImage: product.image,
+      });
+
+      if (res.success) {
+        setIsSaved(true);
+        toast.success("❤️ Đã lưu vào bộ sưu tập của bạn!");
+
+        // Quét lại Firebase để lấy cái ID Document vừa tạo gán vào state
+        const list = await getFirebaseWishlist(user.email);
+        const foundItem = list.find((item) => item.productId === product.id);
+        if (foundItem) setWishlistDocId(foundItem.id);
+      } else {
+        toast.info(res.message); // Báo lỗi nếu Firebase phản hồi trùng lặp
+      }
     }
+
+    setIsLoading(false);
   };
 
   return (
     <button
-      onClick={handleToggle}
-      // NÂNG CẤP CSS: Thêm nền đen mờ backdrop-blur để nổi bần bật trên mọi nền ảnh
-      className={`w-9 h-9 flex items-center justify-center rounded-full border backdrop-blur-md shadow-lg transition-all duration-300 ${
-        isFavorite
-          ? "bg-red-500/20 border-red-500 text-red-500 hover:bg-red-500/30"
-          : "bg-black/50 border-white/10 text-gray-400 hover:text-[#C9A63F] hover:border-[#C9A63F]/50 hover:bg-black/70 hover:shadow-[0_0_10px_rgba(201,166,63,0.5)]"
+      onClick={handleToggleFavorite}
+      disabled={isLoading}
+      title={isSaved ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
+      className={`p-3 rounded-full transition-all duration-300 flex items-center justify-center ${
+        isSaved
+          ? "bg-rose-500/10 text-rose-500 border border-rose-500/20"
+          : "bg-white/5 text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20"
       }`}
-      title="Thêm vào danh sách yêu thích"
     >
-      <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
+      <Heart
+        size={22}
+        fill={isSaved ? "currentColor" : "none"}
+        className={`${isLoading ? "animate-pulse" : ""} transition-all duration-300 ${isSaved ? "scale-110" : "scale-100"}`}
+      />
     </button>
   );
 }

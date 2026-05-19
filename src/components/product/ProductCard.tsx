@@ -49,7 +49,7 @@ export default function ProductCard({ product }: { product: Product }) {
           }}
         >
           {/* Lấy ID sản phẩm truyền vào nút */}
-          <FavoriteButton productId={product.id.toString()} />
+          <FavoriteButton product={product} />
         </div>
       </div>
 
