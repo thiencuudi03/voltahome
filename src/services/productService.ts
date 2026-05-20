@@ -248,6 +248,7 @@ export const createFirebaseOrder = async (orderData: any) => {
     // Bước A: Tạo tài liệu hóa đơn mới
     const docRef = await addDoc(collection(db, "orders"), {
       customerInfo: {
+        email: orderData.email, // 👇 THÊM DÒNG NÀY VÀO ĐÂY LÀ XONG!
         name: orderData.name,
         phone: orderData.phone,
         address: orderData.address,
@@ -286,8 +287,6 @@ export const createFirebaseOrder = async (orderData: any) => {
     return { success: false };
   }
 };
-
-// ... (Giữ nguyên toàn bộ các hàm quản trị và checkout cũ ở trên) ...
 
 // ============================================================================
 // 12. TÁC VỤ USER: LẤY ĐƠN HÀNG THEO EMAIL KHÁCH HÀNG

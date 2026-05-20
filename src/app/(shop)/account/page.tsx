@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-// 1. Sửa dòng này:
-import { useRouter } from "next/navigation"; // ✅ ĐÚNG
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -13,27 +11,36 @@ import {
   Package,
   Trash2,
   LogOut,
-  ChevronRight,
   ShieldCheck,
-  CreditCard,
+  Plus,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/types/product";
 import { getFirebaseOrdersByEmail } from "@/services/productService";
+import { toast } from "sonner";
 
 export default function AccountPage() {
   const router = useRouter();
   const { user, isLoading, wishlist, toggleWishlist } = useAuthStore();
+  const { addItem } = useCartStore();
+
   const [savedProducts, setSavedProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [userOrders, setUserOrders] = useState<any[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Load Wishlist & Orders
+  // Mấu chốt chặn lỗi văng trang:
   useEffect(() => {
-    if (!isLoading && !user) return; // router.push handled by parent/auth guard usually
+    // Nếu chưa đăng nhập, đá về trang login, KHÔNG PHẢI /products
+    if (!isLoading && !user) {
+      router.push("/login");
+      return;
+    }
 
-    // Fetch Wishlist
+    if (!user) return;
+
     const loadWishlist = async () => {
       if (!wishlist.length) return;
       setIsLoadingProducts(true);
@@ -48,7 +55,6 @@ export default function AccountPage() {
       setIsLoadingProducts(false);
     };
 
-    // Fetch Orders
     const loadOrders = async () => {
       if (!user?.email) return;
       setIsLoadingOrders(true);
@@ -59,7 +65,7 @@ export default function AccountPage() {
 
     loadWishlist();
     loadOrders();
-  }, [user, wishlist, isLoading]);
+  }, [user, wishlist, isLoading, router]);
 
   if (isLoading)
     return (
@@ -68,13 +74,19 @@ export default function AccountPage() {
       </div>
     );
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  };
+
   return (
     <main className="min-h-screen bg-[#050505] text-white pt-40 pb-24 px-6 md:px-20">
       <div className="max-w-7xl mx-auto">
-        {/* PROFILE HEADER - Thiết kế dạng Card VIP */}
+        {/* PROFILE HEADER */}
         <section className="relative overflow-hidden bg-[#0A0A0A] border border-white/10 rounded-[3rem] p-8 md:p-12 mb-12">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#C9A63F]/5 blur-[120px] rounded-full" />
-
           <div className="flex flex-col md:flex-row justify-between items-center relative z-10 gap-8">
             <div className="flex items-center gap-8">
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#C9A63F]/20 to-transparent border border-[#C9A63F]/30 flex items-center justify-center">
@@ -87,17 +99,35 @@ export default function AccountPage() {
                 <p className="text-zinc-500 font-light">{user?.email}</p>
                 <div className="mt-4 flex items-center gap-3">
                   <span className="px-4 py-1.5 rounded-full bg-[#C9A63F]/10 border border-[#C9A63F]/30 text-[#C9A63F] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                    <ShieldCheck size={12} /> Thành viên Gold
+                    <ShieldCheck size={12} /> Thành viên
                   </span>
                 </div>
               </div>
             </div>
 
             <button
-              onClick={() => signOut(auth)}
-              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition-colors"
+              disabled={isLoggingOut}
+              onClick={async () => {
+                setIsLoggingOut(true);
+                try {
+                  await signOut(auth);
+                  router.push("/login");
+                } catch (error) {
+                  console.error("Lỗi đăng xuất:", error);
+                  setIsLoggingOut(false);
+                }
+              }}
+              className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
+                isLoggingOut
+                  ? "text-zinc-700 cursor-wait"
+                  : "text-zinc-500 hover:text-white"
+              }`}
             >
-              <LogOut size={16} /> Đăng xuất
+              <LogOut
+                size={16}
+                className={isLoggingOut ? "animate-spin" : ""}
+              />
+              {isLoggingOut ? "ĐANG XUẤT..." : "ĐĂNG XUẤT"}
             </button>
           </div>
         </section>
@@ -117,26 +147,64 @@ export default function AccountPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {userOrders.map((order) => (
                   <div
                     key={order.id}
-                    className="group flex items-center justify-between p-6 bg-white/5 border border-white/5 rounded-2xl hover:border-[#C9A63F]/30 transition-all"
+                    className="group bg-white/5 border border-white/5 rounded-3xl p-6 hover:border-[#C9A63F]/30 transition-all duration-300"
                   >
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                        Mã: #{order.id.slice(0, 8)}
-                      </p>
-                      <p className="text-lg font-black">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(order.totalAmount)}
-                      </p>
+                    <div className="flex justify-between items-start border-b border-white/5 pb-4 mb-4">
+                      <div>
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                          Mã ĐH: #{order.id.slice(0, 8).toUpperCase()}
+                        </p>
+                        <p className="text-[10px] text-zinc-400 mt-1">
+                          Ngày đặt:{" "}
+                          {order.createdAt
+                            ? new Date(order.createdAt).toLocaleDateString(
+                                "vi-VN",
+                              )
+                            : "Vừa xong"}
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase bg-[#C9A63F]/10 px-3 py-1.5 rounded-lg text-[#C9A63F] border border-[#C9A63F]/20">
+                        {order.status}
+                      </span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase bg-black px-4 py-2 rounded-lg text-[#C9A63F] border border-[#C9A63F]/20">
-                      {order.status}
-                    </span>
+
+                    <div className="space-y-4">
+                      {order.items?.map((item: any, index: number) => (
+                        <div key={index} className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-black rounded-xl p-2 flex-shrink-0 border border-white/5">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold truncate text-white">
+                              {item.name}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 uppercase font-bold mt-1">
+                              Số lượng: x{item.quantity}
+                            </p>
+                          </div>
+                          <div className="text-sm font-bold text-[#C9A63F]">
+                            {formatPrice(item.price)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between items-end border-t border-white/5 pt-4 mt-4">
+                      <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                        Tổng thanh toán
+                      </span>
+                      <span className="text-xl font-black text-[#C9A63F]">
+                        {formatPrice(order.totalAmount)}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -148,7 +216,6 @@ export default function AccountPage() {
             <h2 className="text-xs font-black uppercase tracking-[0.2em] mb-8 flex items-center gap-3 text-red-500">
               <Heart size={16} fill="currentColor" /> Yêu thích
             </h2>
-
             <div className="space-y-4">
               {savedProducts.map((p) => (
                 <div key={p.id} className="flex items-center gap-4 group">
@@ -160,15 +227,27 @@ export default function AccountPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold truncate">{p.name}</p>
                     <p className="text-[#C9A63F] text-[10px] font-black">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(p.price)}
+                      {formatPrice(p.price)}
                     </p>
                   </div>
                   <button
-                    onClick={() => toggleWishlist(p.id)}
-                    className="text-zinc-600 hover:text-red-500"
+                    type="button"
+                    onClick={() => {
+                      addItem({ ...p, quantity: 1 } as any);
+                      router.push("/cart");
+                    }}
+                    className="text-zinc-600 hover:text-[#C9A63F] transition-colors"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await toggleWishlist(p.id);
+                      if (typeof toast !== "undefined")
+                        toast.info("Đã xóa khỏi yêu thích");
+                    }}
+                    className="text-zinc-600 hover:text-red-500 transition-colors"
                   >
                     <Trash2 size={16} />
                   </button>

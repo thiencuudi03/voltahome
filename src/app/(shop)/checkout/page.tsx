@@ -4,24 +4,28 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
-// Import tác vụ chốt đơn thật từ tầng service của chúng ta
+import { useAuthStore } from "@/store/authStore";
 import { createFirebaseOrder } from "@/services/productService";
 import { toast } from "sonner";
 import {
   ChevronLeft,
   CreditCard,
   Banknote,
-  ShieldCheck,
   Truck,
+  X,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const { items, clearCart } = useCartStore();
-  const [paymentMethod, setPaymentMethod] = useState("cod"); // 'cod' hoặc 'card'
+  const { user } = useAuthStore();
+  const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  // 🌟 BỔ SUNG STATE QUẢN LÝ THÔNG TIN KHÁCH HÀNG THỰC TẾ
+  // 🌟 State mới để bật/tắt Popup nhập thẻ
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -45,14 +49,10 @@ export default function CheckoutPage() {
     }
   }, [isMounted, items.length, router]);
 
-  if (!isMounted) return null;
-
-  if (items.length === 0) {
-    return null;
-  }
+  if (!isMounted || items.length === 0) return null;
 
   const subtotal = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item: any) => acc + item.price * item.quantity,
     0,
   );
 
@@ -63,19 +63,17 @@ export default function CheckoutPage() {
     }).format(price);
   };
 
-  // ============================================================================
-  // LỘI LOGIC GỬI ĐƠN HÀNG THẬT LÊN CLOUD FIRESTORE
-  // ============================================================================
-  const handlePlaceOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // 🌟 Tách logic xử lý đơn hàng ra một hàm riêng
+  const executeOrder = async () => {
+    // Tắt popup nếu nó đang mở
+    setShowPaymentModal(false);
 
-    // Khởi tạo Toast Loading cao cấp từ thư viện Sonner
     const toastId = toast.loading("Đang xử lý đơn hàng...", {
-      description: "Hệ thống đang mã hóa và gửi thông tin chốt đơn của bạn.",
+      description: "Hệ thống đang ghi nhận đơn hàng của bạn.",
     });
 
-    // Đóng gói payload đúng cấu hình phân hệ Admin Dashboard cần khai thác
     const orderPayload = {
+      email: user?.email || "guest@volthome.com",
       name: formData.name,
       phone: formData.phone,
       address: formData.address,
@@ -83,40 +81,47 @@ export default function CheckoutPage() {
       items: items,
       totalAmount: subtotal,
       paymentMethod: paymentMethod,
+      status: "Chờ xử lý",
+      createdAt: new Date().toISOString(),
     };
 
-    // Gọi API Client gửi thẳng lên mây Firebase qua trình duyệt Chrome
     const result = await createFirebaseOrder(orderPayload);
 
     if (result.success) {
-      // 1. Tắt loading và bắn thông báo thành công bừng sáng
       toast.dismiss(toastId);
       toast.success("ĐẶT HÀNG THÀNH CÔNG!", {
-        description: `Mã đơn hàng [${result.id?.slice(0, 8)}] đã được đồng bộ lên hệ thống VoltHome.`,
+        description: `Mã đơn hàng [${result.id?.slice(0, 8)}] đã được ghi nhận.`,
       });
 
-      // 2. Clear sạch giỏ hàng Store để tránh đặt trùng lặp
       clearCart();
-
-      // 3. Đẩy khách quay về trang chủ mua sắm mượt mà
-      router.push("/");
+      router.push("/account");
     } else {
-      // Báo lỗi nếu đường truyền Firebase rớt mạng hoặc lỗi cấu hình SDK
       toast.dismiss(toastId);
       toast.error("GIAO DỊCH THẤT BẠI", {
-        description:
-          "Hệ thống kết nối Firestore bị gián đoạn, vui lòng kiểm tra lại.",
+        description: "Hệ thống bị gián đoạn, vui lòng thử lại.",
       });
+    }
+  };
+
+  // 🌟 Hàm chặn khi nhấn nút "Xác nhận đặt hàng"
+  const handlePlaceOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (paymentMethod === "card") {
+      // Nếu chọn thẻ, mở Popup giả lập lên
+      setShowPaymentModal(true);
+    } else {
+      // Nếu COD, chạy thẳng hàm đặt hàng
+      executeOrder();
     }
   };
 
   return (
     <main className="min-h-screen bg-[#050505] text-white pt-32 pb-24 px-6 md:px-20 relative">
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Nút quay lại */}
         <Link
           href="/cart"
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-[#C9A63F] transition-colors mb-10 text-xs font-bold uppercase tracking-widest"
+          className="inline-flex items-center gap-2 text-zinc-500 hover:text-[#C9A63F] transition-colors mb-10 text-xs font-bold uppercase tracking-widest"
         >
           <ChevronLeft size={16} /> Quay lại giỏ hàng
         </Link>
@@ -129,9 +134,8 @@ export default function CheckoutPage() {
           onSubmit={handlePlaceOrder}
           className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20"
         >
-          {/* CỘT TRÁI: FORM THÔNG TIN & PHƯƠNG THỨC THANH TOÁN */}
+          {/* CỘT TRÁI: FORM ĐIỀN THÔNG TIN */}
           <div className="lg:col-span-7 space-y-12">
-            {/* 1. Thông tin giao hàng */}
             <div className="space-y-6">
               <h2 className="text-lg font-black uppercase tracking-widest text-[#C9A63F] border-b border-white/10 pb-4 flex items-center gap-3">
                 <Truck size={20} /> Thông tin nhận hàng
@@ -139,7 +143,7 @@ export default function CheckoutPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
                     Họ và tên
                   </label>
                   <input
@@ -153,7 +157,7 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
                     Số điện thoại
                   </label>
                   <input
@@ -167,7 +171,7 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
                     Địa chỉ giao hàng
                   </label>
                   <input
@@ -176,13 +180,13 @@ export default function CheckoutPage() {
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
-                    placeholder="Số nhà, tên đường, phường/xã, quận/huyện, thành phố"
+                    placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."
                     className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F] transition-colors"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                    Ghi chú (Tùy chọn)
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                    Ghi chú
                   </label>
                   <textarea
                     rows={3}
@@ -196,23 +200,21 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* 2. Phương thức thanh toán */}
             <div className="space-y-6">
               <h2 className="text-lg font-black uppercase tracking-widest text-[#C9A63F] border-b border-white/10 pb-4 flex items-center gap-3">
                 <CreditCard size={20} /> Phương thức thanh toán
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Lựa chọn 1: Thanh toán khi nhận hàng */}
                 <label
-                  className={`cursor-pointer border rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden ${paymentMethod === "cod" ? "border-[#C9A63F] bg-[#C9A63F]/5" : "border-white/10 hover:border-white/30 bg-[#0A0A0A]"}`}
+                  className={`cursor-pointer border rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 ${paymentMethod === "cod" ? "border-[#C9A63F] bg-[#C9A63F]/5" : "border-white/10 hover:border-white/30 bg-[#0A0A0A]"}`}
                 >
-                  <div className="flex items-center justify-between z-10">
+                  <div className="flex items-center justify-between">
                     <Banknote
                       className={
                         paymentMethod === "cod"
                           ? "text-[#C9A63F]"
-                          : "text-gray-500"
+                          : "text-zinc-500"
                       }
                       size={28}
                     />
@@ -222,29 +224,28 @@ export default function CheckoutPage() {
                       value="cod"
                       checked={paymentMethod === "cod"}
                       onChange={() => setPaymentMethod("cod")}
-                      className="accent-[#C9A63F] w-4 h-4 cursor-pointer"
+                      className="accent-[#C9A63F]"
                     />
                   </div>
-                  <div className="z-10">
+                  <div>
                     <h3 className="font-bold text-sm mb-1">
                       Thanh toán khi nhận hàng
                     </h3>
-                    <p className="text-xs text-gray-500">
-                      Tiền mặt hoặc chuyển khoản khi Shipper giao đến.
+                    <p className="text-xs text-zinc-500">
+                      Tiền mặt hoặc chuyển khoản.
                     </p>
                   </div>
                 </label>
 
-                {/* Lựa chọn 2: Thẻ tín dụng/Ghi nợ */}
                 <label
-                  className={`cursor-pointer border rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden ${paymentMethod === "card" ? "border-[#C9A63F] bg-[#C9A63F]/5" : "border-white/10 hover:border-white/30 bg-[#0A0A0A]"}`}
+                  className={`cursor-pointer border rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 ${paymentMethod === "card" ? "border-[#C9A63F] bg-[#C9A63F]/5" : "border-white/10 hover:border-white/30 bg-[#0A0A0A]"}`}
                 >
-                  <div className="flex items-center justify-between z-10">
+                  <div className="flex items-center justify-between">
                     <CreditCard
                       className={
                         paymentMethod === "card"
                           ? "text-[#C9A63F]"
-                          : "text-gray-500"
+                          : "text-zinc-500"
                       }
                       size={28}
                     />
@@ -254,15 +255,13 @@ export default function CheckoutPage() {
                       value="card"
                       checked={paymentMethod === "card"}
                       onChange={() => setPaymentMethod("card")}
-                      className="accent-[#C9A63F] w-4 h-4 cursor-pointer"
+                      className="accent-[#C9A63F]"
                     />
                   </div>
-                  <div className="z-10">
-                    <h3 className="font-bold text-sm mb-1">
-                      Thẻ Tín Dụng / Ghi Nợ
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      Thanh toán bảo mật qua cổng quốc tế Stripe.
+                  <div>
+                    <h3 className="font-bold text-sm mb-1">Thẻ Tín Dụng</h3>
+                    <p className="text-xs text-zinc-500">
+                      Thanh toán bảo mật qua hệ thống.
                     </p>
                   </div>
                 </label>
@@ -270,21 +269,19 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: CHI TIẾT ĐƠN HÀNG */}
+          {/* CỘT PHẢI: BILL TÍNH TIỀN */}
           <div className="lg:col-span-5">
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] p-8 lg:sticky lg:top-32 shadow-2xl">
+            <div className="bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] p-8 lg:sticky lg:top-32">
               <h2 className="text-xl font-black uppercase tracking-widest mb-8 text-center">
                 Đơn hàng của bạn
               </h2>
-
-              {/* Danh sách món lấy động từ Zustand store */}
               <div className="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {items.map((item) => (
+                {items.map((item: any) => (
                   <div
                     key={item.id}
                     className="flex items-center gap-4 border-b border-white/5 pb-4"
                   >
-                    <div className="w-16 h-16 bg-white/5 rounded-xl p-2 flex-shrink-0">
+                    <div className="w-16 h-16 bg-white/5 rounded-xl p-2">
                       <img
                         src={item.image}
                         alt={item.name}
@@ -292,10 +289,8 @@ export default function CheckoutPage() {
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold line-clamp-1">
-                        {item.name}
-                      </p>
-                      <p className="text-[10px] text-gray-500 uppercase">
+                      <p className="text-sm font-bold">{item.name}</p>
+                      <p className="text-[10px] text-zinc-500">
                         Số lượng: {item.quantity}
                       </p>
                     </div>
@@ -305,45 +300,106 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
-
-              {/* Tính tiền */}
               <div className="space-y-4 mb-8 border-b border-white/10 pb-6">
-                <div className="flex justify-between text-gray-400 text-sm">
+                <div className="flex justify-between text-zinc-400 text-sm">
                   <span>Tạm tính</span>
                   <span className="text-white">{formatPrice(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-gray-400 text-sm">
-                  <span>Vận chuyển</span>
-                  <span className="text-green-400 font-bold uppercase text-[10px]">
-                    Miễn phí
-                  </span>
-                </div>
               </div>
-
               <div className="flex justify-between items-end mb-8">
-                <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                <span className="text-xs font-bold uppercase text-zinc-500">
                   Tổng thanh toán
                 </span>
                 <span className="text-3xl font-serif italic text-[#C9A63F]">
                   {formatPrice(subtotal)}
                 </span>
               </div>
-
-              {/* Nút bấm chốt đơn */}
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-3 bg-[#C9A63F] text-black py-5 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:bg-white transition-all duration-300"
+                className="w-full bg-[#C9A63F] text-black py-5 rounded-full font-black uppercase text-xs hover:bg-white transition-all duration-300"
               >
                 Xác nhận đặt hàng
               </button>
-
-              <div className="mt-6 flex items-center justify-center gap-2 text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em]">
-                <ShieldCheck size={14} /> Mã hóa bảo mật SSL 256-bit
-              </div>
             </div>
           </div>
         </form>
       </div>
+
+      {/* 🌟 MÀN HÌNH POPUP GIẢ LẬP NHẬP THẺ TÍN DỤNG */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#0A0A0A] border border-[#C9A63F]/30 rounded-[2rem] p-8 max-w-md w-full relative animate-in fade-in zoom-in duration-300">
+            {/* Nút đóng */}
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-8 text-[#C9A63F]">
+              <ShieldCheck size={28} />
+              <h3 className="text-xl font-black uppercase tracking-widest">
+                Thanh toán thẻ
+              </h3>
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                  Số thẻ
+                </label>
+                <input
+                  type="text"
+                  placeholder="0000 0000 0000 0000"
+                  className="w-full bg-black border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F]"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                    Ngày hết hạn
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="MM/YY"
+                    className="w-full bg-black border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+                    Mã CVV
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="***"
+                    maxLength={3}
+                    className="w-full bg-black border border-white/10 rounded-xl py-4 px-5 text-sm text-white focus:outline-none focus:border-[#C9A63F]"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 mt-6 flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] text-zinc-500 uppercase font-bold">
+                    Số tiền thanh toán
+                  </p>
+                  <p className="text-xl font-black text-[#C9A63F]">
+                    {formatPrice(subtotal)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={executeOrder} // Bấm xác nhận thì chạy hàm tạo đơn
+                  className="bg-[#C9A63F] text-black px-8 py-4 rounded-full font-black uppercase text-xs hover:bg-white transition-all"
+                >
+                  Thanh toán ngay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
