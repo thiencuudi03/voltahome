@@ -6,7 +6,8 @@ import { ShoppingCart, Search, User, X, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
-import { useAuthStore } from "@/store/authStore"; // 1. Import thêm authStore để kiểm tra phiên đăng nhập
+import { useAuthStore } from "@/store/authStore";
+import ThemeToggle from "@/components/ui/ThemeToggle"; // 1. IMPORT COMPONENT NÚT GẠT
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -17,7 +18,7 @@ export default function Header() {
 
   const router = useRouter();
   const { items } = useCartStore();
-  const { user } = useAuthStore(); // 2. Lấy thông tin user hiện tại từ Zustand Store
+  const { user } = useAuthStore();
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
@@ -35,11 +36,10 @@ export default function Header() {
     if (searchQuery.trim()) {
       router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
-      setSearchQuery("");
+      setSearchQuery(""); // Đổi thành setSearchQuery
       setIsMobileMenuOpen(false);
     }
   };
-
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -60,7 +60,7 @@ export default function Header() {
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-500 ${
         scrolled || isSearchOpen
-          ? "bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.8)]"
+          ? "bg-[#050505]/80 dark:bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.8)]"
           : "bg-gradient-to-b from-black/80 to-transparent"
       }`}
     >
@@ -157,13 +157,15 @@ export default function Header() {
 
         {/* Icons Area */}
         <div className="flex items-center gap-6 md:gap-8 z-50 text-gray-300">
+          {/* 2. CHÈN NÚT GẠT ĐỔI MÀU VÀO ĐÂY */}
+          <ThemeToggle />
+
           <Search
             strokeWidth={1.5}
             className={`h-5 w-5 cursor-pointer transition-all duration-300 hidden md:block hover:scale-110 ${isSearchOpen ? "text-[#C9A63F]" : "hover:text-[#C9A63F]"}`}
             onClick={() => setIsSearchOpen(!isSearchOpen)}
           />
 
-          {/* ĐÃ SỬA: Tự động chuyển hướng /account nếu đã có user, giữ tông màu vàng Luxury khi đăng nhập */}
           <Link
             href={user ? "/account" : "/login"}
             className="hidden md:block hover:scale-110 transition-transform duration-300"
@@ -249,7 +251,6 @@ export default function Header() {
         <div className="mt-auto pb-12 flex flex-col gap-6">
           <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          {/* ĐÃ SỬA: Đồng bộ link mobile hướng về đúng trang tùy thuộc trạng thái đăng nhập */}
           <Link
             href={user ? "/account" : "/login"}
             onClick={() => setIsMobileMenuOpen(false)}

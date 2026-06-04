@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import AuthInitializer from "@/components/providers/AuthInitializer";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/providers/ThemeProvider"; // Import ThemeProvider
 
 export const metadata: Metadata = {
   title: "VoltHome - Luxury Electronics",
@@ -14,14 +15,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
-      <body className="antialiased bg-black text-white">
-        {/* AuthInitializer sẽ duy trì trạng thái đăng nhập cho toàn bộ trang web */}
-        <AuthInitializer>
-          {/* Toaster đặt ở đây để thông báo hiển thị trên toàn hệ thống (cả Shop và Admin) */}
-          <Toaster theme="dark" position="top-right" />
-          {children}
-        </AuthInitializer>
+    // Thêm suppressHydrationWarning để tránh lỗi của next-themes
+    <html lang="vi" suppressHydrationWarning>
+      {/* Đã xóa bg-black text-white vì màu sắc giờ do biến CSS quản lý */}
+      <body className="antialiased">
+        {/* Bọc toàn bộ app bằng ThemeProvider */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark" // Đặt dark làm mặc định theo thiết kế Luxury
+          enableSystem={false}
+        >
+          {/* AuthInitializer duy trì trạng thái đăng nhập */}
+          <AuthInitializer>
+            {/* Mẹo nhỏ: Bạn có thể đổi theme="dark" thành theme="system" 
+              nếu muốn Toaster tự động đổi màu theo giao diện Sáng/Tối 
+            */}
+            <Toaster theme="system" position="top-right" />
+
+            {children}
+          </AuthInitializer>
+        </ThemeProvider>
       </body>
     </html>
   );

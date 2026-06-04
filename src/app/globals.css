@@ -1,32 +1,55 @@
 @import "tailwindcss";
 
+/* Kích hoạt chế độ dark mode bằng class cho Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------- */
+/* 1. CHẾ ĐỘ SÁNG (Light Mode)                          */
+/* ---------------------------------------------------- */
 :root {
-  /* Chuyển sang tông màu Đen - Vàng Gold Luxury */
-  --background: #050505;
-  --foreground: #ffffff;
-  --primary: #eab308; /* Màu Vàng Gold */
+  --background: #ffffff; /* Nền trắng */
+  --foreground: #050505; /* Chữ đen */
+  --primary: #eab308; /* Màu Vàng Gold - Giữ nguyên làm điểm nhấn */
+  --primary-dark: #ca8a04;
+  --secondary: #f4f4f5;
+  --muted: #e4e4e7;
+  --border: rgba(0, 0, 0, 0.1);
+  --card: #f9f9f9;
+  --radius: 1rem;
+}
+
+/* ---------------------------------------------------- */
+/* 2. CHẾ ĐỘ TỐI (Dark Mode - Màu Luxury gốc của bạn)   */
+/* ---------------------------------------------------- */
+.dark {
+  --background: #050505; /* Nền đen */
+  --foreground: #ffffff; /* Chữ trắng */
+  --primary: #eab308;
   --primary-dark: #ca8a04;
   --secondary: #27272a;
   --muted: #18181b;
   --border: rgba(255, 255, 255, 0.1);
   --card: #0f0f0f;
-  --radius: 1rem;
 }
 
-/* ĐÃ XÓA khối * { margin: 0; padding: 0; box-sizing: border-box; } vì Tailwind đã tự làm việc đó */
-
+/* ---------------------------------------------------- */
+/* 3. THIẾT LẬP CƠ BẢN                                  */
+/* ---------------------------------------------------- */
 html,
 body {
+  /* Tự động lấy màu nền và màu chữ theo chế độ đang bật */
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.6;
-
-  /* ĐÃ XÓA min-height: 100% VÀ overflow-x: hidden. 
-     Thay vào đó, hãy dùng class `overflow-x-hidden` trực tiếp vào thẻ <main> trong layout.tsx nếu cần */
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease; /* Hiệu ứng chuyển màu mượt mà */
 }
 
-/* Giữ các class tiện ích của bạn nhưng cập nhật màu sắc */
+/* ---------------------------------------------------- */
+/* 4. CÁC CLASS TIỆN ÍCH TÙY CHỈNH                      */
+/* ---------------------------------------------------- */
 .container {
   max-width: 1280px;
   margin: 0 auto;
@@ -36,12 +59,12 @@ body {
 .section-title {
   font-size: 2.25rem;
   font-weight: 700;
-  color: var(--foreground);
+  color: var(--foreground); /* Tự động đổi trắng/đen */
   margin-bottom: 1rem;
 }
 
 .gradient-text {
-  /* Gradient màu vàng đồng sang trọng */
+  /* Gradient màu vàng đồng sang trọng - Màu vàng hiển thị đẹp trên cả 2 nền */
   background: linear-gradient(135deg, #fde047, #eab308);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -54,9 +77,9 @@ body {
   padding: 0.9rem 1.8rem;
   border-radius: 9999px;
   background: var(--primary);
-  color: black;
+  color: black; /* Chữ trên nút vàng luôn là đen để dễ đọc */
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
-/* Các đoạn còn lại giữ nguyên... */
+/* Các đoạn code khác của bạn giữ nguyên bên dưới... */

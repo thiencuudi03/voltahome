@@ -15,8 +15,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // Dữ liệu cho Banner lớn trải dài ở trên
 const topBanners = [
-  { id: 1, image: "/images/products/bn-m1.png", link: "/offers" },
-  { id: 2, image: "/images/products/bn-m2.png", link: "/offers" },
+  { id: 1, image: "/images/products/bn-m3.png", link: "/offers" },
+  { id: 2, image: "/images/products/bn-m4.png", link: "/offers" },
 ];
 
 // Dữ liệu cho cụm 3 hình bên dưới
