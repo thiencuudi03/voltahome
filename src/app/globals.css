@@ -4,7 +4,20 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------- */
-/* 1. CHẾ ĐỘ SÁNG (Light Mode)                          */
+/* 1. ĐĂNG KÝ BIẾN VÀO TAILWIND V4 (BẮT BUỘC)           */
+/* ---------------------------------------------------- */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+}
+
+/* ---------------------------------------------------- */
+/* 2. CHẾ ĐỘ SÁNG (Light Mode)                          */
 /* ---------------------------------------------------- */
 :root {
   --background: #ffffff; /* Nền trắng */
@@ -19,7 +32,7 @@
 }
 
 /* ---------------------------------------------------- */
-/* 2. CHẾ ĐỘ TỐI (Dark Mode - Màu Luxury gốc của bạn)   */
+/* 3. CHẾ ĐỘ TỐI (Dark Mode - Màu Luxury gốc của bạn)   */
 /* ---------------------------------------------------- */
 .dark {
   --background: #050505; /* Nền đen */
@@ -30,21 +43,6 @@
   --muted: #18181b;
   --border: rgba(255, 255, 255, 0.1);
   --card: #0f0f0f;
-}
-
-/* ---------------------------------------------------- */
-/* 3. THIẾT LẬP CƠ BẢN                                  */
-/* ---------------------------------------------------- */
-html,
-body {
-  /* Tự động lấy màu nền và màu chữ theo chế độ đang bật */
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.6;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease; /* Hiệu ứng chuyển màu mượt mà */
 }
 
 /* ---------------------------------------------------- */
@@ -59,12 +57,11 @@ body {
 .section-title {
   font-size: 2.25rem;
   font-weight: 700;
-  color: var(--foreground); /* Tự động đổi trắng/đen */
+  color: var(--foreground);
   margin-bottom: 1rem;
 }
 
 .gradient-text {
-  /* Gradient màu vàng đồng sang trọng - Màu vàng hiển thị đẹp trên cả 2 nền */
   background: linear-gradient(135deg, #fde047, #eab308);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -77,9 +74,7 @@ body {
   padding: 0.9rem 1.8rem;
   border-radius: 9999px;
   background: var(--primary);
-  color: black; /* Chữ trên nút vàng luôn là đen để dễ đọc */
+  color: black;
   font-weight: 600;
   transition: all 0.3s ease;
 }
-
-/* Các đoạn code khác của bạn giữ nguyên bên dưới... */
